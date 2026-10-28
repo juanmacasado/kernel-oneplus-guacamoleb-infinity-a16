@@ -8,17 +8,21 @@ actualizaciones posteriores de Harish hasta `17-c` del 24 de octubre de 2026,
 adaptadas a la ROM Android 16. Se fusionó el historial completo; las excepciones
 de ABI y arranque están en [HARISH_UPDATES.md](HARISH_UPDATES.md).
 
-El candidato `2e381f23e9cd` compila Image, 20 DTB y cuatro módulos; WLAN va
-integrado. Superó un arranque **temporal**, Android completo, root, SELinux
-Enforcing, driver 33355/UAPI 5, SUSFS y asociación Wi-Fi. El teléfono volvió al
-boot anterior, cuya partición permanece intacta. No se presenta como una prueba
-de estabilidad prolongada. Un aviso de IRQ del cargador se reproduce también
-con el boot anterior. Evidencia: [compilación](build-result-harish.json) y
-[runtime sin identificadores personales](runtime-harish.json).
+El kernel `2e381f23e9cd` compila Image, 20 DTB y cuatro módulos; WLAN va
+integrado. Tras la prueba temporal se instaló en **boot_a** por petición del
+usuario y pasó dos arranques desde la partición instalada: Android completo,
+root, SELinux Enforcing, driver 33355/UAPI 5, gestor 3.4.2, SUSFS y WLAN.
+También pasaron tres ciclos de pantalla y cuatro pings al router sin pérdidas.
 
-La versión anterior `8bb17398cadd` sí se instaló de forma persistente y se
-conserva como recuperación. Su historial está en [VERSION_3_4_2.md](VERSION_3_4_2.md).
-El gestor continúa en 3.4.2.
+Se mantiene como experimental: el contador de suspensión profunda siguió en
+cero, y faltan pruebas prolongadas y de hardware. El aviso de IRQ del cargador
+se reproduce también con el kernel anterior. El usuario confirmó cámara, audio y GPS
+funcionando. Estado y límites: [prueba persistente](PERSISTENT_TEST.md) y
+[lecturas resumidas](runtime-harish-persistent.json).
+
+La versión anterior `8bb17398cadd` se conserva como recuperación local. Su
+historial está en [VERSION_3_4_2.md](VERSION_3_4_2.md). Evidencia anterior:
+[compilación](build-result-harish.json) y [arranque temporal](runtime-harish.json).
 
 ## Base y procedencia
 

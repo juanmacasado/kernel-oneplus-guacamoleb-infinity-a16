@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-28",
+  "device": "OnePlus 7 guacamoleb / GM1901",
+  "rom": "Infinity X 3.12 Vanilla / Android 16",
+  "kernel": "4.14.357-perf-g2e381f23e9cd",
+  "compiled_source": "2e381f23e9cd70474f3a8b0e6d106e712e125359",
+  "installed_partition": "boot_a (active slot a)",
+  "installed_bytes": 100663296,
+  "installed_sha256": "1a13d1e5d0699b0619fd16afe7669cdf6d051fb02bb11883ef7f14aaf4be3042",
+  "backup_sha256": "0af449c667ad7d09679f4c3c306785bfd47eed0cb5a9bccf174f1045811e22d7",
+  "other_partitions_written_by_this_operation": [],
+  "successful_installed_boots": 2,
+  "boot_completed": true,
+  "root_uid": 0,
+  "selinux": "Enforcing",
+  "ksunext_driver": {
+    "driver_version": 33355,
+    "driver_tag": "v3.4.2-legacy-a16-susfs2.3",
+    "uapi": 5,
+    "flags": 0
+  },
+  "manager_version": "v3.4.2",
+  "manager_code": 33355,
+  "susfs_version": "2.3.0",
+  "susfs_features": 10,
+  "wlan_builtin": true,
+  "wlan_carrier": 1,
+  "wlan_operstate": "up",
+  "local_gateway_ping": {
+    "sent": 4,
+    "received": 4,
+    "loss_percent": 0
+  },
+  "display_off_on_cycles": 3,
+  "reboots_during_display_cycles": 0,
+  "deep_suspend_success_counter": 0,
+  "deep_suspend_tested": false,
+  "camera_service_registered_devices": 4,
+  "new_severe_kernel_diagnostics_in_checked_logs": [],
+  "known_warning": "Unbalanced enable for IRQ 600 in unchanged OPlus charging path, also reproduced with prior installed kernel.",
+  "not_validated": [
+    "long-term stability",
+    "deep suspend and overnight drain",
+    "cellular hardware/calls",
+    "full camera/audio endurance and modes"
+  ],
+  "stability_assessment": "favorable initial result; automatic checks and user-reported camera/audio/GPS passed; longer use and deep sleep remain unvalidated",
+  "manual_hardware_report": {
+    "source": "user statement after persistent flash",
+    "camera": "working",
+    "audio": "working",
+    "gps": "working"
+  },
+  "same_boot_after_manual_tests": true
+}
