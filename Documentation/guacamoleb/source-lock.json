@@ -1,0 +1,142 @@
+{
+  "format": 1,
+  "target": {
+    "device": "guacamoleb",
+    "rom": "Infinity X 3.12 Vanilla",
+    "android": 16,
+    "kernel_series": "4.14"
+  },
+  "base": {
+    "repository": "https://github.com/Codecity001/android_kernel_oneplus_sm8150",
+    "branch_observed": "16-c",
+    "commit": "943be052999e4d65f805f8c6a5f22b44ad832683",
+    "exact_august_binary_source_recovered": false,
+    "binary_git_suffix": "6e88ac37df0c"
+  },
+  "driver_reference": {
+    "repository": "https://github.com/Codecity001/android_kernel_oneplus_sm8150",
+    "commit": "b1d34c4a99eaed5531333781ec8f389c53b9bad9",
+    "path": "drivers/kernelsu",
+    "legacy_susfs_repository": "https://github.com/sidex15/KernelSU-Next",
+    "legacy_susfs_commit": "d999a2aff11575c6e2f520129ecffb7c6058fb02",
+    "legacy_repository": "https://github.com/KernelSU-Next/KernelSU-Next",
+    "selected_compat_fixes_from": "165b87fa99abfe78058c4dc9df43c432e86b8011",
+    "note": "Selected compatibility fixes, not a verbatim import of that tip; retain the vendor SELinux flex_array layout.",
+    "legacy_commit": "0b17f24246db5c80c056b92c15bcad2b77f1276e"
+  },
+  "susfs": {
+    "version": "2.3.0",
+    "source_repository": "https://github.com/Codecity001/android_kernel_oneplus_sm8150",
+    "cherry_picks": [
+      {
+        "commit": "11b18a9b70c78696bb1114b44a9d91c8c937683f",
+        "subject": "mm: susfs: implement sus_memfd"
+      },
+      {
+        "commit": "229169c6bf03d320a10873f9d1b872d17c6c471c",
+        "subject": "fs: susfs: change open redirect inode to inode->i_state"
+      },
+      {
+        "commit": "d2513532fa3b2ffcb3174ee62b94166b851e9daf",
+        "subject": "fs: susfs: More optimization for hide_sus_mnts_for_non_su_procs"
+      },
+      {
+        "commit": "8746efae1221fe1219853855275150ac925a0280",
+        "subject": "fs: susfs: OPEN_REDIRECT: Fix potential UAF bug"
+      },
+      {
+        "commit": "3c1585a3a724fcf0a3905e345a3534b5350a5698",
+        "subject": "fs: susfs: OPEN_REDIRECT: Fix memory leak and possible deadlock"
+      },
+      {
+        "commit": "ca79def231f85d9bcb5cbc2ad798ba5482a46a47",
+        "subject": "fs: susfs: bump version to v2.3.0"
+      },
+      {
+        "commit": "632214ea50f373b508772894a8ed26e9ff9a6931",
+        "subject": "fs: susfs: Refactor spoofing logic of SUS_MOUNT, SUS_KSTAT and OPEN_REDIRECT"
+      },
+      {
+        "commit": "f521feb8efc72457c56c71f01714b138f122b8dd",
+        "subject": "fs: susfs: SUS_MOUNT: Fix potential detection of mount minor dev gap - The detection was public by JingMatrix Demo app, see https://github.com/JingMatrix/Demo/commit/15e71acddb773b45b6c6821dfcc0e7eba85ec8f2"
+      },
+      {
+        "commit": "32240c2825f6557bf3af4beecee1df8392f14422",
+        "subject": "fs: susfs: change DEFAULT_KSU_MNT_ID and DEFAULT_KSU_MNT_GROUP_ID to upstream values"
+      },
+      {
+        "commit": "a9d6d568821e86d44fb4f9dcad5d20ff7839f75d",
+        "subject": "fs: susfs Fix NULL deref for susfs_get_enabled_features()"
+      },
+      {
+        "commit": "8df793a190261cfafc83dc90b0775475d757e810",
+        "subject": "fs: susfs: SUS_KSTAT: Fix wrong spoofing logic in vfs_statfs()"
+      },
+      {
+        "commit": "1d25698a1a18c1ac12df07dd6a68081656cc09e1",
+        "subject": "fs: susfs: SUS_KSTAT: Fix wrong bit for KSTAT_SPOOF_CTIME_TV_SEC that leads to unexpected spoofing behavior"
+      },
+      {
+        "commit": "504c2c381b16b71ec29d2aa6699424658a8674e3",
+        "subject": "fs: susfs: free new_entry when susfs_update_sus_kstat() finds no match"
+      },
+      {
+        "commit": "5343ba094d439e28fedc2a073bc9f6c5d23b663f",
+        "subject": "fs: susfs: emit spoofed cmdline once outside seqlock retry"
+      },
+      {
+        "commit": "068be616cc2cfa6be1c7872778553dd2400bd2f7",
+        "subject": "fs: susfs: SUS_KSTAT: fix f_flags left zeroed on the SUS_KSTAT statfs path"
+      },
+      {
+        "commit": "3af5e040b6b59ca711636d550f6e379aeee9b342",
+        "subject": "fs: susfs: SUS_KSTAT: rename susfs_calculate_f_flags to calculate_f_flags_wrapper"
+      },
+      {
+        "commit": "34da7efae8bed8c1c3a6906e56a167e205224df2",
+        "subject": "fs: susfs: SUS_KSTAT: Add new wrapper for statfs_by_dentry()"
+      },
+      {
+        "commit": "e50975290d357e06d691da11dcdee60919d1fe46",
+        "subject": "fs: susfs: SUS_KSTAT: Fix the wrong type of member \"is_statically\""
+      },
+      {
+        "commit": "c061bf81b67b2a54d7040c06fdb8348b4abd9068",
+        "subject": "fs: susfs: Match target_ino in SUS_KSTAT and OPEN_REDIRECT lookups"
+      },
+      {
+        "commit": "264738417b6d51244e915f8fac1956507eb0cb70",
+        "subject": "fs: susfs: Check d_path() with IS_ERR() in the SUS_MOUNT fdinfo paths"
+      },
+      {
+        "commit": "aaaec4829255380e19b297b9ace1e207c7237456",
+        "subject": "fs: susfs: Delegate the sus mount show handlers to the originals"
+      }
+    ]
+  },
+  "integration_commit": "54809cff301eab00b763fbdaa2acee1c40477a9a",
+  "reported_driver_version": 33315,
+  "reported_driver_tag": "v3.4.0-legacy-a16-susfs2.3",
+  "manager_interface": {
+    "manager_release": "v3.4.2",
+    "manager_min_kernel_version": 33188,
+    "driver_version": 33315,
+    "driver_uapi": 5,
+    "manager_uapi": 5,
+    "shared_structures": 23,
+    "structure_mismatches": [],
+    "shared_ioctl_numbers": 20,
+    "ioctl_mismatches": {},
+    "manager_only_structures": [],
+    "header_sha256": "7d1ac24a0ccf2214d5868a5183e74372e824e0507f1529290716883e90c47c45",
+    "scope": "textual interface comparison, not compiled ABI or runtime validation",
+    "manager_commit": "4c706b5938665866ebe16944a481a7b91e3396af",
+    "manager_header_url": "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/4c706b5938665866ebe16944a481a7b91e3396af/uapi/supercall.h"
+  },
+  "validation": {
+    "compiled": false,
+    "device_tested": false,
+    "boot_image_produced": false,
+    "static_checker": "tools/guacamoleb/verify_integration.py --self-test"
+  }
+}
