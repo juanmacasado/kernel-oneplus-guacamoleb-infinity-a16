@@ -249,7 +249,11 @@ int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
 	const char su[] = SU_PATH;
 	static const char ksud_path[] = KSUD_PATH;
 	struct ksu_sulog_pending_event *pending_root = NULL;
-	const char *const *sucompat_argv = (const char *const *)__never_use_argv;
+	/* The manual hook passes struct user_arg_ptr, not a kernel argv array.
+	 * Log the executable only; never dereference user/compat argv as kernel
+	 * pointers in the kernel-array logger.
+	 */
+	const char *const sucompat_argv[] = { su, NULL };
 
 	if (unlikely(!filename_ptr))
 		return 0;

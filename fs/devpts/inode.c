@@ -608,10 +608,18 @@ struct dentry *devpts_pty_new(struct pts_fs_info *fsi, int index, void *priv)
  *
  * Returns whatever was passed as priv in devpts_pty_new for a given inode.
  */
+#ifdef CONFIG_KSU
+extern int ksu_handle_devpts(struct inode *inode);
+#endif
+
 void *devpts_get_priv(struct dentry *dentry)
 {
 	if (dentry->d_sb->s_magic != DEVPTS_SUPER_MAGIC)
 		return NULL;
+#ifdef CONFIG_KSU
+	if (d_inode(dentry))
+		ksu_handle_devpts(d_inode(dentry));
+#endif
 	return dentry->d_fsdata;
 }
 

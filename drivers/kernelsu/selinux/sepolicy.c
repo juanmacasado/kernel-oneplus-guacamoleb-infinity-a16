@@ -9,6 +9,7 @@
 #include <linux/slab.h>
 #include <linux/sizes.h>
 #include <linux/version.h>
+#include <linux/flex_array.h>
 
 #include "sepolicy.h"
 #include "klog.h" // IWYU pragma: keep

@@ -288,7 +288,7 @@ void *scan_call_to(void *start, size_t size, void *target)
 
 
 
-#include <linux/cache.h> 
+#include <linux/cache.h>
 #include "patch_memory.h"
 #include "klog.h" // IWYU pragma: keep
 #include <linux/cpumask.h>

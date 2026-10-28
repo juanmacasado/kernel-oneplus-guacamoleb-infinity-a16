@@ -33,7 +33,7 @@ extern int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
 					void *argv, void *envp, int *flags);
 
 /*
- * The manual call site in fs/exec.c (__do_execve_file) already hands us
+ * The manual call site in fs/exec.c (do_execveat_common) hands us
  * struct user_arg_ptr values, so pass them straight through with their real
  * type. Declaring the parameter as void* here while ksud_integration.c
  * defines it as struct user_arg_ptr* is a conflicting declaration of the

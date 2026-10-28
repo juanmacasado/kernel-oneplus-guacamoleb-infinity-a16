@@ -1,4 +1,5 @@
 #include <linux/err.h>
+#include "compat/kernel_compat.h"
 #include <linux/fs.h>
 #include <linux/gfp.h>
 #include <linux/kernel.h>

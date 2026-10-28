@@ -1,4 +1,6 @@
 #include <linux/capability.h>
+#include <linux/kallsyms.h>
+#include "compat/kernel_compat.h"
 #include <linux/cred.h>
 #include <linux/slab.h>
 #include <linux/string.h>
@@ -44,7 +46,7 @@ static int do_grant_root(void __user *arg)
 	int ret;
     __u32 audit_uid = current_uid().val;
     __u32 audit_euid = current_euid().val;
-    
+
     // we already check uid above on allowed_for_su()
 
     write_sulog('i'); // log ioctl escalation
@@ -1101,9 +1103,9 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
         .perm_check = only_root
     },
     {
-        .cmd = KSU_IOCTL_DISABLE_ESCAPE_TO_ROOT, 
-        .name = "DISABLE_ESCAPE_TO_ROOT", 
-        .handler = do_disable_escape_to_root, 
+        .cmd = KSU_IOCTL_DISABLE_ESCAPE_TO_ROOT,
+        .name = "DISABLE_ESCAPE_TO_ROOT",
+        .handler = do_disable_escape_to_root,
         .perm_check = only_root,
         .allow_su_session = true
     },
