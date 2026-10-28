@@ -5,7 +5,7 @@
 
 La primera validación comprobaba invariantes textuales; no era una
 comprobación completa de compilación o enlace. Esta revisión encontró dos
-errores en la integración publicada y tres problemas adicionales en el código
+errores en la integración publicada y cinco problemas adicionales en el código
 heredado. Se han corregido en fuentes; la compilación sigue pendiente.
 
 ## Correcciones
@@ -18,13 +18,16 @@ heredado. Se han corregido en fuentes; la compilación sigue pendiente.
 | Firma de callback fanotify incoherente | Con SUS_MOUNT o SUS_KSTAT activos, `show_fdinfo()` esperaba tres argumentos; fanotify conservaba dos. La configuración antigua tiene FANOTIFY desactivado, pero la combinación era inválida. | Usar una firma interna uniforme de tres argumentos para inotify/fanotify y para el despachador, independientemente de las opciones SUSFS. |
 | Claim y publicación de init.rc sin exclusión | READ_ONCE/WRITE_ONCE sobre `rc_hooked` no impedían que dos lectores reclamaran simultáneamente el proxy y escribieran sus operaciones globales. | Proteger con mutex la comprobación, inicialización y publicación. Detener el hook repetido fuera del mutex. |
 
+| Cadenas de usuarios sin terminación comprobada | Las órdenes de rutas y uname copiaban arrays completos y después los pasaban a funciones de strings, sin exigir un NUL dentro del campo. | Validar 12 campos en 10 entradas de SUSFS y devolver ENAMETOOLONG antes de utilizarlos si falta el terminador. |
+| Reserva concurrente del cmdline compartido | Dos escritores podían superar el test del puntero y reservar buffers distintos, perdiendo una reserva. | Usar un único array estático, con la publicación y copia protegidas por el seqlock existente. |
+
 Se mantuvieron el DTS, el montaje de vendor, la política de firmas y los
 ajustes de producto ajenos a KSU de la base Android 16. No se sustituyó la
 imagen de arranque por una de Android 17.
 
 ## Validación ampliada
 
-- 21 contratos de fuentes y 16 regresiones negativas. Ahora se incluye la
+- 23 contratos de fuentes y 18 regresiones negativas. Ahora se incluye la
   selección del resolver en modo manual, la firma fanotify, el orden de la
   reserva en SUSFS y el mutex de init.rc. El control de alcance también
   considera archivos nuevos no versionados, antes omitidos.
@@ -33,6 +36,10 @@ imagen de arranque por una de Android 17.
   sintéticos: callbacks, read/exec hooks y layout de los argumentos con y sin
   CONFIG_COMPAT. Los casos negativos deben producir el diagnóstico específico;
   un fallo ajeno de sintaxis no se cuenta como éxito.
+- 22 casos de límites del helper de cadenas añadido localmente, con GCC, ASan
+  y UBSan y datos sintéticos. No se ejecuta código Android. LeakSanitizer no
+  funciona bajo el ptrace del sandbox y se desactiva solo en esa prueba; el
+  helper no usa heap.
 - Contrato textual del gestor 3.4.2: 23 estructuras y 20 números ioctl
   compartidos, UAPI 5 y mínimo de driver 33188 frente a 33315.
 - APK local del gestor: SHA-256

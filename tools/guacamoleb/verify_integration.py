@@ -143,6 +143,31 @@ def validate(read, changed, original_config):
         and proxy.index("file->f_op = &fops_proxy;") < proxy.index("rc_hooked = true;")
         and proxy.count("mutex_unlock(&rc_proxy_lock);") == 2
     )
+    susfs = read("fs/susfs.c")
+    string_fields = {
+        "susfs_add_sus_path": ["target_pathname"],
+        "susfs_add_sus_path_loop": ["target_pathname"],
+        "susfs_add_sus_kstat": ["target_pathname"],
+        "susfs_update_sus_kstat": ["target_pathname"],
+        "susfs_add_try_umount": ["target_pathname"],
+        "susfs_set_uname": ["release", "version"],
+        "susfs_add_open_redirect": ["target_pathname", "redirected_pathname"],
+        "susfs_add_sus_map": ["target_pathname"],
+        "susfs_add_sus_memfd": ["target_pathname"],
+        "susfs_set_cmdline_or_bootconfig": ["fake_cmdline_or_bootconfig"],
+    }
+    guards = []
+    for name, fields in string_fields.items():
+        body = susfs.split(name + "(void __user **user_info)", 1)[1].split("\nout_copy_to_user:", 1)[0]
+        operator = "->" if name == "susfs_set_cmdline_or_bootconfig" else "."
+        guards.append("-ENAMETOOLONG" in body and all(
+            f"susfs_string_terminated(info{operator}{field}, sizeof(info{operator}{field}))" in body
+            for field in fields))
+    checks["susfs_copied_strings_are_bounded"] = all(guards)
+    checks["cmdline_buffer_has_single_static_storage"] = (
+        "static char fake_cmdline_or_bootconfig[SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE];" in susfs
+        and "fake_cmdline_or_bootconfig = (char *)kzalloc" not in susfs
+    )
     checks["selinux_layout_matches_this_4_14_tree"] = (
         "struct flex_array *htable;" in read("security/selinux/ss/avtab.h")
         and "#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 1, 0)\n"
@@ -199,6 +224,8 @@ def main():
         ("fs/notify/fdinfo.c", "fanotify_fdinfo(struct seq_file *m, struct fsnotify_mark *mark, struct file *file)", "fanotify_fdinfo(struct seq_file *m, struct fsnotify_mark *mark)", "fdinfo_callbacks_have_consistent_signatures"),
         (KSU + "hook/setuid_hook.c", "if (work_pending(&susfs_extra_works))", "tw = kzalloc(sizeof(*tw), GFP_ATOMIC);\n    if (work_pending(&susfs_extra_works))", "susfs_work_does_not_leak_on_pending_branch"),
         (KSU + "runtime/ksud_integration.c", "mutex_lock(&rc_proxy_lock);", "", "init_rc_proxy_claim_and_publication_serialized"),
+        ("fs/susfs.c", "susfs_string_terminated(info.redirected_pathname, sizeof(info.redirected_pathname))", "unchecked_string(info.redirected_pathname)", "susfs_copied_strings_are_bounded"),
+        ("fs/susfs.c", "static char fake_cmdline_or_bootconfig[SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE];", "static char *fake_cmdline_or_bootconfig;", "cmdline_buffer_has_single_static_storage"),
         ("include/linux/susfs.h", "KSTAT_SPOOF_CTIME_TV_SEC (1 << 8)", "KSTAT_SPOOF_CTIME_TV_SEC (1 < 8)", "susfs_2_3_and_correct_ctime_mask"),
     ]
     regression_count = 0

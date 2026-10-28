@@ -88,10 +88,11 @@ Desde la raíz de este repositorio:
 ```text
 python3 tools/guacamoleb/verify_integration.py --self-test
 python3 tools/guacamoleb/check_c_contracts.py
+python3 tools/guacamoleb/test_susfs_strings.py
 git diff --no-ext-diff --no-textconv --check 943be052999e4d65f805f8c6a5f22b44ad832683
 ```
 
-Pasan **21 comprobaciones estáticas y 16 regresiones negativas**. Comprueban
+Pasan **23 comprobaciones estáticas y 18 regresiones negativas**. Comprueban
 la inclusión del driver, selección de hooks, firmas de las interfaces,
 fuentes de objetos, backports, layout SELinux y preservación del alcance.
 Las regresiones introducen en memoria errores como desactivar KSU, cambiar la
@@ -101,7 +102,10 @@ El helper es de lectura: no ejecuta Kbuild ni código del kernel ni usa red.
 Se añaden **8 sondas C de solo sintaxis para AArch64**, con declaraciones
 extraídas del árbol y datos sintéticos. Contrastan callbacks, firmas de hooks
 y layout de `user_arg_ptr`; tres casos deben fallar por el diagnóstico previsto.
-No ejecutan Kbuild ni código del kernel.
+No ejecutan Kbuild ni código del kernel. El helper puro de validación de
+cadenas se prueba por separado con 22 casos sintéticos de límites y ASan/UBSan
+en el anfitrión; LeakSanitizer está desactivado por la restricción ptrace del
+sandbox y ese helper no realiza reservas de heap.
 
 La [revisión completa](REVIEW.md) documenta los errores detectados después de
 la primera publicación y sus correcciones. El [plan de Kbuild](BUILD_CHECK_PLAN.md)

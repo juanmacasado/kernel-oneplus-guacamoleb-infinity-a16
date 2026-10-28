@@ -1,4 +1,5 @@
 #include <linux/version.h>
+#include <linux/string.h>
 #include <linux/cred.h>
 #include <linux/fs.h>
 #include <linux/slab.h>
@@ -39,6 +40,11 @@ bool susfs_is_log_enabled __read_mostly = true;
 #define SUSFS_LOGE(fmt, ...) 
 #endif
 
+static bool susfs_string_terminated(const char *str, size_t size)
+{
+	return memchr(str, '\0', size) != NULL;
+}
+
 bool susfs_starts_with(const char *str, const char *prefix) {
     while (*prefix) {
         if (*str++ != *prefix++)
@@ -64,6 +70,11 @@ void susfs_add_sus_path(void __user **user_info) {
 		info.err = -EFAULT;
 		goto out_copy_to_user;
 	}
+	if (!susfs_string_terminated(info.target_pathname, sizeof(info.target_pathname))) {
+		info.err = -ENAMETOOLONG;
+		goto out_copy_to_user;
+	}
+
 
 	info.err = kern_path(info.target_pathname, LOOKUP_FOLLOW, &path);
 	if (info.err) {
@@ -114,6 +125,11 @@ void susfs_add_sus_path_loop(void __user **user_info) {
 		info.err = -EFAULT;
 		goto out_copy_to_user;
 	}
+	if (!susfs_string_terminated(info.target_pathname, sizeof(info.target_pathname))) {
+		info.err = -ENAMETOOLONG;
+		goto out_copy_to_user;
+	}
+
 
 	if (*info.target_pathname == '\0') {
 		SUSFS_LOGE("target_pathname cannot be empty\n");
@@ -359,6 +375,11 @@ void susfs_add_sus_kstat(void __user **user_info) {
 		info.err = -EFAULT;
 		goto out_copy_to_user;
 	}
+	if (!susfs_string_terminated(info.target_pathname, sizeof(info.target_pathname))) {
+		info.err = -ENAMETOOLONG;
+		goto out_copy_to_user;
+	}
+
 
 	if (*info.target_pathname == '\0') {
 		info.err = -EINVAL;
@@ -471,6 +492,11 @@ void susfs_update_sus_kstat(void __user **user_info) {
 		info.err = -EFAULT;
 		goto out_copy_to_user;
 	}
+	if (!susfs_string_terminated(info.target_pathname, sizeof(info.target_pathname))) {
+		info.err = -ENAMETOOLONG;
+		goto out_copy_to_user;
+	}
+
 
 	new_entry = kzalloc(sizeof(struct st_susfs_sus_kstat_hlist), GFP_KERNEL);
 	if (!new_entry) {
@@ -714,6 +740,11 @@ void susfs_add_try_umount(void __user **user_info) {
 		info.err = -EFAULT;
 		goto out_copy_to_user;
 	}
+	if (!susfs_string_terminated(info.target_pathname, sizeof(info.target_pathname))) {
+		info.err = -ENAMETOOLONG;
+		goto out_copy_to_user;
+	}
+
 
 	if (info.mnt_mode == TRY_UMOUNT_DEFAULT) {
 		info.mnt_mode = 0;
@@ -772,6 +803,12 @@ void susfs_set_uname(void __user **user_info) {
 		info.err = -EFAULT;
 		goto out_copy_to_user;
 	}
+	if (!susfs_string_terminated(info.release, sizeof(info.release)) ||
+	    !susfs_string_terminated(info.version, sizeof(info.version))) {
+		info.err = -ENAMETOOLONG;
+		goto out_copy_to_user;
+	}
+
 
 	mutex_lock(&susfs_mutex_lock_set_uname);
 	if (!strcmp(info.release, "default")) {
@@ -832,7 +869,7 @@ out_copy_to_user:
 
 /* spoof_cmdline_or_bootconfig */
 #ifdef CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG
-static char *fake_cmdline_or_bootconfig = NULL;
+static char fake_cmdline_or_bootconfig[SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE];
 static bool susfs_is_fake_cmdline_or_bootconfig_set = false;
 static DEFINE_SEQLOCK(susfs_fake_cmdline_or_bootconfig_seqlock);
 
@@ -852,19 +889,17 @@ void susfs_set_cmdline_or_bootconfig(void __user **user_info) {
 		info->err = -EFAULT;
 		goto out_copy_to_user;
 	}
+	if (!susfs_string_terminated(info->fake_cmdline_or_bootconfig, sizeof(info->fake_cmdline_or_bootconfig))) {
+		info->err = -ENAMETOOLONG;
+		goto out_copy_to_user;
+	}
+
 
 	if (*info->fake_cmdline_or_bootconfig == '\0') {
 		info->err = -EINVAL;
 		goto out_copy_to_user;
 	}
 
-	if (!fake_cmdline_or_bootconfig) {
-		fake_cmdline_or_bootconfig = (char *)kzalloc(SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE, GFP_KERNEL);
-		if (!fake_cmdline_or_bootconfig) {
-			info->err = -ENOMEM;
-			goto out_copy_to_user;
-		}
-	}
 
 	write_seqlock(&susfs_fake_cmdline_or_bootconfig_seqlock);
 	strncpy(fake_cmdline_or_bootconfig,
@@ -929,6 +964,12 @@ void susfs_add_open_redirect(void __user **user_info) {
 		info.err = -EFAULT;
 		goto out_copy_to_user;
 	}
+	if (!susfs_string_terminated(info.target_pathname, sizeof(info.target_pathname)) ||
+	    !susfs_string_terminated(info.redirected_pathname, sizeof(info.redirected_pathname))) {
+		info.err = -ENAMETOOLONG;
+		goto out_copy_to_user;
+	}
+
 
         if (*info.target_pathname == '\0') {
                 info.err = -EINVAL;
@@ -1214,6 +1255,11 @@ void susfs_add_sus_map(void __user **user_info) {
 		info.err = -EFAULT;
 		goto out_copy_to_user;
 	}
+	if (!susfs_string_terminated(info.target_pathname, sizeof(info.target_pathname))) {
+		info.err = -ENAMETOOLONG;
+		goto out_copy_to_user;
+	}
+
 
 	info.err = kern_path(info.target_pathname, LOOKUP_FOLLOW, &path);
 	if (info.err) {
@@ -1254,6 +1300,11 @@ int susfs_add_sus_memfd(void __user **user_info) {
 		info.err = -EFAULT;
 		goto out_copy_to_user;
 	}
+	if (!susfs_string_terminated(info.target_pathname, sizeof(info.target_pathname))) {
+		info.err = -ENAMETOOLONG;
+		goto out_copy_to_user;
+	}
+
 
 	mutex_lock(&susfs_mutex_lock_sus_memfd);
 	list_for_each_entry(cursor, &LH_SUS_MEMFD, list) {
