@@ -1,82 +1,85 @@
-# KernelSU Next 3.4.2 — port legacy para guacamoleb
+# KernelSU Next 3.4.2 — legacy port for guacamoleb
 
-Referencia oficial: [v3.4.2, 4c706b5938665866ebe16944a481a7b91e3396af](https://github.com/KernelSU-Next/KernelSU-Next/tree/4c706b5938665866ebe16944a481a7b91e3396af).
-Se revisó el delta oficial v3.4.0..v3.4.2, de 61 commits. Se conservan el
-backend manual 4.14 y SUSFS inline 2.3.0 de esta rama. La etiqueta resultante
-`v3.4.2-legacy-a16-susfs2.3` identifica un **port de compatibilidad**, no el
-driver GKI oficial sin cambios. Código de versión fijado explícitamente en
-33355, sin inventar un recuento de commits.
+Official reference: [v3.4.2, 4c706b5938665866ebe16944a481a7b91e3396af](https://github.com/KernelSU-Next/KernelSU-Next/tree/4c706b5938665866ebe16944a481a7b91e3396af).
+The 61-commit official v3.4.0..v3.4.2 delta was reviewed. This branch retains its
+manual 4.14 backend and inline SUSFS 2.3.0. The resulting tag
+`v3.4.2-legacy-a16-susfs2.3` identifies a **compatibility port**, not the unchanged
+official GKI driver. Version code is explicitly pinned to 33355 rather than
+inventing a commit count.
 
-## Cambios efectivos
+This historical report covers the 8bb17398 build. The subsequent Harish merge
+and installed kernel are documented in [HARISH_UPDATES.md](HARISH_UPDATES.md)
+and [PERSISTENT_TEST.md](PERSISTENT_TEST.md).
 
-- Se incorpora de v3.4.2 `feature/module_blacklist.c/.h`, usando el mecanismo
-  nativo del kernel. El parámetro `block_modules` está vacío por defecto:
-  no se bloquea ningún módulo si el usuario no lo solicita expresamente.
-- Se aplica la repetición de features forzadas tras post-fs-data y al terminar
-  la inicialización tardía, como en la release. La configuración actual no
-  fuerza valores nuevos.
-- Se corrigen las lecturas RCU de la política SELinux dentro del mutex en la
-  rama que utiliza `selinux_state.policy`; se conservan los locks del backend
-  antiguo y su layout flex_array real en este vendor 4.14.
-- Se corrige un defecto adicional del port legacy: el parser `force_feature`
-  avanzaba más allá del NUL final porque comprobaba el puntero `end` en vez
-  de `*end`. Una prueba con ASan/UBSan pasa 14 casos y reproduce el
-  heap-buffer-overflow al reintroducir la condición antigua.
+## Effective changes
 
-## Cambios oficiales ya presentes o específicos del backend
+- Import v3.4.2 `feature/module_blacklist.c/.h`, using the kernel's native
+  mechanism. `block_modules` is empty by default: no module is blocked unless
+  the user explicitly requests it.
+- Retry forced features after post-fs-data and at the end of late initialization,
+  matching the release. The current configuration forces no new values.
+- Fix RCU reads of the SELinux policy inside the mutex on the branch using
+  `selinux_state.policy`; retain the old backend's locks and the actual
+  flex_array layout of this vendor 4.14 tree.
+- Fix an additional legacy-port defect: the `force_feature` parser advanced
+  past the final NUL because it tested pointer `end` rather than `*end`.
+  ASan/UBSan tests pass 14 cases and reproduce heap-buffer-overflow when the
+  old condition is restored.
 
-La integración anterior ya traía los cambios de pinning/caché de manager,
-extracción de paquete mediante strrchr, escaneo de APK fuera del callback
-iterate_dir, deferral mediante task_work, shell_su_adb_only y SID de adbd,
-EVENT_SERVICES sin duplicados, features forzadas, correcciones de avtab/xperms
-y sincronización de policydb.len. Se revisaron sus implementaciones legacy;
-no se reemplazan por versiones GKI incompatibles con 4.14.
+## Official changes already present or specific to the backend
 
-El cambio ksyscall de la release utiliza wrappers pt_regs inexistentes en
-4.14; el port mantiene sus llamadas sys_* directas. RISC-V y sus registros
-orig_a0 no se incorporan a este producto ARM64. El nuevo módulo SUSFS LKM
-de la release tampoco se carga sobre el SUSFS inline que ya está activo.
-SELinux Hide conserva la implementación legacy adaptada a este vendor, que
-difiere de la reimplementación con backup de política del backend GKI; no se
-afirma equivalencia completa de todas sus funciones o de su ocultación.
-Preinit continúa desactivado y UAPI continúa en 5, compatible con el gestor.
+The preceding integration already included manager pinning/cache changes,
+package extraction using strrchr, APK scanning outside the iterate_dir callback,
+task_work deferral, shell_su_adb_only and the adbd SID, EVENT_SERVICES without
+duplicates, forced features, avtab/xperms fixes and policydb.len synchronization.
+Their legacy implementations were reviewed; they are not replaced with GKI
+versions incompatible with 4.14.
 
-## Gestor
+The release's ksyscall change uses pt_regs wrappers unavailable in 4.14; this
+port retains direct sys_* calls. RISC-V and its orig_a0 registers are not imported
+into this ARM64 product. The release's new SUSFS LKM is not loaded over the
+already active inline SUSFS. SELinux Hide retains the legacy implementation
+adapted to this vendor tree, which differs from the GKI backend's policy-backup
+reimplementation. Complete feature or hiding equivalence is not claimed.
+Preinit remains disabled and UAPI remains 5, compatible with the manager.
 
-Se actualizó el APK de v3.2.0/33129 a **v3.4.2/33355** conservando datos.
+## Manager
+
+The APK was updated from v3.2.0/33129 to **v3.4.2/33355**, preserving its data.
 SHA-256: `774a5511f7034a4930e881114e202319cbdc34c5aaaa5c7c6b6d2902364e4c58`.
-Antes de actualizar se validaron criptográficamente ambos APK con apksigner:
-el certificado v2 coincide y es el esperado por el driver. Se conservó una
-copia local del APK anterior. No se desinstaló la aplicación ni borraron datos.
+Before updating, both APKs were cryptographically checked with apksigner: the
+v2 certificate matches the previous APK and the driver's expected identity.
+A local copy of the previous APK was retained. The app was not uninstalled
+and its data was not wiped.
 
-## Estado de validación
+## Validation of this build
 
-Compilado y probado el commit **8bb17398caddb23966f215e55518174687289353**:
+Compiled and tested commit: **8bb17398caddb23966f215e55518174687289353**.
 
-- Image, 20 DTB y cinco módulos: build completo con código 0 en 295,7 segundos.
-- Configuración semánticamente idéntica al kernel anterior; CRC de los cinco
-  módulos generados y los 394 del WLAN instalado coincidentes.
-- Cuatro avisos heredados de secciones en update_manifest y
-  update_telephony_manifest; fuente OPlus sin cambios. Un aviso del compilador
-  anfitrión en modpost sobre const, sin error de compilación.
-- 24 contratos estáticos, 18 regresiones negativas, ocho sondas C, 22 casos de
-  strings y 14 del parser, con rechazo ASan del bucle antiguo.
-- Arranque temporal y persistente correctos, UID 0, SELinux Enforcing,
-  wlan0 up/carrier=1 y SUSFS v2.3.0 con diez features.
-- Driver leído por ioctl: **33355, v3.4.2-legacy-a16-susfs2.3, UAPI 5**.
-- Gestor instalado: **v3.4.2 / 33355**.
-- Boot_a leído tras reiniciar: SHA-256
+- Image, 20 DTBs and five modules: complete build, status 0, 295.7 seconds.
+- Configuration semantically identical to the preceding kernel; CRCs of the
+  five generated modules and all 394 installed WLAN entries match.
+- Four inherited section warnings in update_manifest and update_telephony_manifest,
+  with unchanged OPlus source. One host compiler const warning in modpost,
+  without a compilation error.
+- 24 static contracts, 18 negative regressions, eight C probes, 22 string cases
+  and 14 parser cases, including ASan rejection of the old loop.
+- Successful temporary and persistent boots, UID 0, SELinux Enforcing,
+  wlan0 up/carrier=1 and SUSFS v2.3.0 with ten features.
+- Driver read by ioctl: **33355, v3.4.2-legacy-a16-susfs2.3, UAPI 5**.
+- Installed manager: **v3.4.2 / 33355**.
+- boot_a read after reboot: SHA-256
   `0af449c667ad7d09679f4c3c306785bfd47eed0cb5a9bccf174f1045811e22d7`,
-  coincidente exactamente con el nuevo boot. Se conservan ramdisk y DTB
-  anteriores byte a byte. No se escribió boot_b.
+  matching that new boot exactly. Previous ramdisk and DTBs were preserved
+  byte for byte. boot_b was not written.
 
-El backup previo a esta actualización tiene SHA-256
+The backup preceding this update has SHA-256
 `edaabd74693d0cf215e64c21817d1aa9662236eb3c05921569140c6fbccda6af`
-y corresponde al kernel probado `30a151d718fb`. Quedan fuera la estabilidad
-prolongada, todo el hardware y la eficacia de ocultación. Se sigue usando
-Clang 23 de diagnóstico, no el Clang Android original.
+and corresponds to tested kernel `30a151d718fb`. Long-term stability, all hardware
+and hiding effectiveness remain outside this report. Diagnostic Clang 23 is
+still used rather than the original Android Clang.
 
-El diagnóstico propio [ksu_get_info.c](../../tools/guacamoleb/ksu_get_info.c)
-solo lee GET_INFO/GET_VERSION_TAG y se retiró del temporal después de usarlo.
-Se compiló con el NDK r27d, API 29 y alineación TLS ARM64 de 64 bytes;
-el primer intento de API 24 fue rechazado por Bionic antes de entrar a main.
+The project diagnostic [ksu_get_info.c](../../tools/guacamoleb/ksu_get_info.c)
+only reads GET_INFO/GET_VERSION_TAG and was removed from the device temporary
+directory after use. It was compiled with NDK r27d, API 29 and 64-byte ARM64 TLS
+alignment; an initial API 24 attempt was rejected by Bionic before entering main.

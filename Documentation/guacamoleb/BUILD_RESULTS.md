@@ -1,94 +1,95 @@
-# Resultado de compilación aislada
+# Isolated build results
 
-28 de octubre de 2026. **Image, DTB y módulos compilan y enlazan con éxito**
-en el commit `30a151d718fb5b91ad20f44c5a1f16fade51de26`.
-Las actualizaciones posteriores de documentación no forman parte del binario.
-El inventario y los hashes SHA-256 están en [build-result.json](build-result.json).
-Este documento describe la fase de compilación; el candidato boot preparado
-posteriormente se documenta en [FLASH_CANDIDATE.md](FLASH_CANDIDATE.md).
+28 October 2026. **Image, DTBs and modules compile and link successfully** at
+commit `30a151d718fb5b91ad20f44c5a1f16fade51de26`. Later documentation changes
+are not part of that binary. The artifact inventory and SHA-256 hashes are in
+[build-result.json](build-result.json).
 
-## Entorno y autorización
+This historical report covers the first build stage. The boot candidate prepared
+later is documented in [FLASH_CANDIDATE.md](FLASH_CANDIDATE.md); the currently
+installed Harish update is covered by [PERSISTENT_TEST.md](PERSISTENT_TEST.md).
 
-El usuario autorizó expresamente ejecutar el [plan](BUILD_CHECK_PLAN.md).
-Se usó Bubblewrap sin red, con el sistema y las fuentes en solo lectura,
-`/tmp` privado y un directorio nuevo de salidas escribible. Cuatro trabajos,
-tope de 8 GiB y monitor de tamaño/tiempo. La salida completa ocupó unos
-840 MiB, por debajo del límite. No se instalaron dependencias.
+## Environment and authorization
 
-Herramientas ya instaladas: Clang/LLD **23.1.4**, utilidades LLVM,
-GCC anfitrión **16.2.1 20260810**. `HOSTCFLAGS=-O2 -std=gnu11` fija el
-estándar de los auxiliares anfitriones de este árbol antiguo. Las herramientas
-Android AArch64 generaron binarios que solo se inspeccionaron como datos.
+The user explicitly authorized the [plan](BUILD_CHECK_PLAN.md). Bubblewrap
+provided no network, read-only system and sources, a private `/tmp`, and a new
+writable output directory. The run used four jobs, an 8 GiB limit and output-size
+and elapsed-time monitoring. Complete output occupied approximately 840 MiB,
+below the limit. No dependencies were installed.
 
-Clang 23 sirve como diagnóstico: **no reproduce Clang Android r574158**.
-Este resultado no se presenta como build oficial o de publicación.
+Already installed tools: Clang/LLD **23.1.4**, LLVM utilities and host GCC
+**16.2.1 20260810**. `HOSTCFLAGS=-O2 -std=gnu11` pins the language standard for
+this old tree's host helpers. Android AArch64 tools generated binaries that were
+only inspected as data during this stage.
 
-## Configuración y objetivos
+Clang 23 is diagnostic: **it does not reproduce Android Clang r574158**. This
+result is not presented as an official build or a build using the release toolchain.
 
-Se combinaron las peticiones de `vendor/sm8150-perf_defconfig` y
-`vendor/oplus.config`, y se resolvieron con `olddefconfig`. Conserva KSU
-integrado, hooks manuales y SUSFS; hooks dinámicos y SUS_MEMFD desactivados,
-MODVERSIONS activo y firma de módulos desactivada como en la base.
+## Configuration and targets
 
-No hay diferencias semánticas frente a la configuración extraída de la imagen
-Android 16 de agosto: 5020 símbolos antiguos y 5021 actuales, considerando
-ausencia como `n`. Esto no demuestra que los fuentes o binarios sean iguales.
-Las peticiones de fragmentos descartadas por dependencias/choices y los avisos
-de Kconfig quedaron registrados; no se forzaron opciones para silenciarlos.
-Kconfig se resolvió en `0dcf4b1858c10547b20097306232c5d258bd07d6` y se
-comprobó que los fragmentos y Kconfig del driver no cambiaron hasta el commit
-compilado.
+Requests from `vendor/sm8150-perf_defconfig` and `vendor/oplus.config` were
+combined and resolved with `olddefconfig`. Built-in KSU, manual hooks and SUSFS
+remain enabled; dynamic hooks and SUS_MEMFD are disabled, MODVERSIONS is enabled,
+and module signing is disabled as in the baseline.
 
-La compilación parcial de KSU y los archivos fs/mm modificados pasa. Después,
-`make -j4 Image dtbs modules` termina con código **0**, en 301 segundos:
+There are no semantic differences from the configuration extracted from the
+August Android 16 image: 5020 old symbols and 5021 current symbols, treating
+absence as `n`. This does not prove identical sources or binaries. Requests
+discarded because of dependencies/choices and Kconfig warnings were recorded;
+options were not forced merely to silence them. Kconfig was resolved at
+`0dcf4b1858c10547b20097306232c5d258bd07d6`; product fragments and the driver's
+Kconfig were checked to be unchanged through the compiled commit.
 
-| Resultado | Comprobación offline |
+The partial KSU build and modified fs/mm objects pass. Then
+`make -j4 Image dtbs modules` finishes with status **0** in 301 seconds:
+
+| Result | Offline check |
 |---|---|
-| `arch/arm64/boot/Image` | Cabecera ARM64 válida; release `4.14.357-perf-g30a151d718fb` |
-| `vmlinux` | KSU, sus hooks y SUSFS enlazados; sin símbolos fuertes indefinidos. Solo quedan dos referencias débiles opcionales de BTF |
-| 20 DTB | Cabeceras FDT válidas, incluidos los cuatro de `18821`; sus fuentes conservan la base Android 16 |
-| `wlan.ko` | ELF AArch64, vermagic de este kernel; las 393 importaciones fuertes están exportadas; los 394 CRC, incluido module_layout, coinciden con Module.symvers |
-| Otros cuatro módulos | gspca_main, tcp_bic, tcp_htcp y tcp_westwood; sus 90 CRC combinados también coinciden |
+| `arch/arm64/boot/Image` | Valid ARM64 header; release `4.14.357-perf-g30a151d718fb` |
+| `vmlinux` | KSU, its hooks and SUSFS linked; no undefined strong symbols. Only two optional weak BTF references remain |
+| 20 DTBs | Valid FDT headers, including the four for `18821`; their sources retain the Android 16 baseline |
+| `wlan.ko` | AArch64 ELF with this kernel's vermagic; all 393 strong imports are exported; all 394 CRCs, including module_layout, match Module.symvers |
+| Four other modules | gspca_main, tcp_bic, tcp_htcp and tcp_westwood; their combined 90 CRCs also match |
 
-El módulo WLAN **recién generado** corresponde a este kernel. No se ha
-contrastado el WLAN que lleva instalada la ROM. La base mantiene un bypass
-de CRC para WLAN cuando KSU está activo: ese bypass no acredita compatibilidad
-de un módulo distinto.
+The **newly generated** WLAN module corresponds to this kernel. At this stage,
+the ROM's installed WLAN module had not been compared. The baseline retains a
+WLAN CRC bypass when KSU is active; that bypass does not establish compatibility
+with a different module.
 
-## Diagnósticos y correcciones
+## Diagnostics and fixes
 
-Kbuild descubrió dos defectos adicionales, corregidos antes del resultado:
+Kbuild revealed two additional defects, fixed before the successful result:
 
-- Dos patrones grep con un paréntesis literal rompían el parseo de
-  `$(shell ...)` del Makefile de KSU; ahora usan el identificador completo.
-- La compilación parcial/paralela de KSU carecía de dependencia para generar
-  `flask.h`. `prepare` invoca ahora la regla existente de SELinux antes de
-  compilar KSU. No se reescriben fuentes durante el build.
+- Two grep patterns containing literal parentheses broke parsing of
+  `$(shell ...)` in the KSU Makefile; they now match the complete identifier.
+- Partial/parallel KSU compilation lacked a dependency to generate `flask.h`.
+  `prepare` now invokes the existing SELinux rule before compiling KSU.
+  Sources are not rewritten during the build.
 
-No aparecen errores ni avisos del compilador en el log completo. Modpost
-informa de **cuatro referencias entre secciones**, identificadas ejecutándolo
-con diagnósticos detallados sobre el mismo `vmlinux.o`:
-`update_manifest()` y `update_telephony_manifest()` referencian
-`boot_command_line`, marcado `__initdata`.
+The original build log review reported no compiler errors or warnings. Modpost
+reports **four cross-section references**, identified by running its detailed
+diagnostics against the same `vmlinux.o`: `update_manifest()` and
+`update_telephony_manifest()` reference `boot_command_line`, marked `__initdata`.
 
-El archivo `drivers/soc/oplus/system/oplus_project/qcom/oplus_project.c`
-es idéntico al de la base Android 16. Las únicas llamadas activas observadas
-proceden de `oplus_project_init()`, que es `__init` y `arch_initcall`, antes
-de liberar initdata. Se documenta como aviso heredado de anotaciones; no se
-ha alterado ese controlador ni comprobado su ejecución en hardware.
+`drivers/soc/oplus/system/oplus_project/qcom/oplus_project.c` is identical to the
+Android 16 baseline at this stage. The only active calls observed originate in
+`oplus_project_init()`, marked `__init` and registered with `arch_initcall`, before
+initdata is freed. This is documented as an inherited annotation warning; that
+driver was not changed or exercised on hardware during this build stage.
 
-Las suites locales pasan: **24 contratos de fuentes, 18 regresiones negativas,
-8 sondas C y 22 casos de límites con ASan/UBSan**. Su cobertura sigue siendo
-la descrita en [REVIEW.md](REVIEW.md).
+Local suites pass: **24 source contracts, 18 negative regressions, eight C probes
+and 22 boundary cases with ASan/UBSan**. Their coverage remains as described in
+[REVIEW.md](REVIEW.md).
 
-## Lo que falta
+## Limits at this stage
 
-No se generó boot.img ni un ZIP instalable, no se ejecutaron APK o binarios
-Android y no se accedió al teléfono. Image carece del empaquetado de boot
-necesario; estos archivos no constituyen una propuesta de flasheo.
+No boot.img or installable ZIP was generated, no APK or Android binary was run,
+and the phone was not accessed during this build stage. Image still needed boot
+packing; these files alone were not a flash proposal.
 
-Siguen pendientes el toolchain Android de publicación, los módulos/boot sin
-modificar de la ROM exacta y cualquier prueba de arranque, root, SELinux,
-WLAN, suspensión, consumo o SUSFS en hardware. El commit exacto declarado por
-la imagen antigua (`6e88ac37df0c`) no se ha recuperado. La compilación no
-certifica ausencia de malware ni compatibilidad del daily driver.
+The Android release toolchain, the exact ROM's unmodified modules/boot and all
+hardware checks of boot, root, SELinux, WLAN, suspend, power consumption and
+SUSFS were still pending. The exact commit declared by the old image
+(`6e88ac37df0c`) was not recovered. Compilation does not certify absence of
+malware or compatibility with a daily driver. Later outcomes are recorded
+separately rather than retroactively attributed to this build-only stage.

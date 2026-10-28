@@ -19,6 +19,7 @@ SUSFS_FILES = {
     "fs/statfs.c", "fs/super.c", "fs/susfs.c", "include/linux/susfs.h",
     "include/linux/susfs_def.h", "mm/shmem.c",
 }
+PROJECT_METADATA_FILES = {"README.md", "AGENTS.md"}
 INTEGRATION_FILES = {
     "Makefile", CONFIG, "drivers/Kconfig", "drivers/Makefile", "fs/devpts/inode.c",
     "fs/exec.c", "fs/read_write.c",
@@ -82,7 +83,7 @@ def validate(read, changed, original_config):
     )
     checks["scope_preserves_android16_boot_and_drivers"] = all(
         p.startswith((KSU, "Documentation/guacamoleb/", "tools/guacamoleb/"))
-        or p in SUSFS_FILES | INTEGRATION_FILES | UPSTREAM_FILES for p in changed
+        or p in SUSFS_FILES | INTEGRATION_FILES | UPSTREAM_FILES | PROJECT_METADATA_FILES for p in changed
     )
     checks["android16_fstab_nodes_preserved"] = all(
         'compatible = "android,fstab";' in read("arch/arm64/boot/dts/" + board + "/sm8150.dtsi")

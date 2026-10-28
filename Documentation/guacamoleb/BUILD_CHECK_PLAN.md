@@ -1,53 +1,52 @@
-# Comprobación local de Kbuild autorizada
+# Authorized isolated Kbuild check
 
-El usuario autorizó el 28 de octubre de 2026 esta comprobación aislada,
-respondiendo: «Sí, autoriza esa comprobación aislada». Esa autorización cumple
-el requisito de AGENTS.md para ejecutar Kbuild y sus auxiliares dentro de este
-alcance. Los resultados están en [BUILD_RESULTS.md](BUILD_RESULTS.md).
-Este documento no autoriza acceso a un teléfono ni empaquetado de boot.
+On 28 October 2026, the user explicitly approved this isolated check. Their
+confirmation, translated into English, was: “Yes, authorize that isolated check.”
+This meets the inherited AGENTS.md requirement to authorize Kbuild and its
+helpers within the following scope. Results are in [BUILD_RESULTS.md](BUILD_RESULTS.md).
+This historical build plan does not itself authorize device access or boot packing.
+For the current device state, see [PERSISTENT_TEST.md](PERSISTENT_TEST.md).
 
-## Alcance concreto
+## Specific scope
 
-- Generar `.config` con las peticiones de los fragmentos
-  `vendor/sm8150-perf_defconfig` y `vendor/oplus.config`, y ejecutar `olddefconfig`.
-- Comprobar que Kconfig conserva KSU integrado, manual hooks, SUSFS y la
-  política de módulos prevista; registrar cualquier opción descartada.
-- Compilar primero el objetivo de directorio `drivers/kernelsu/` y los archivos de fs/mm
-  modificados. Si esa fase pasa, intentar `Image`, `dtbs` y módulos, incluido
-  WLAN, y comprobar los símbolos enlazados.
-- Usar las herramientas ya instaladas: Clang 23.1.4, LLD y utilidades LLVM,
-  binutils GNU AArch64, GCC anfitrión, flex, bison y bc. No instalar ni
-  descargar dependencias o toolchains ejecutables.
+- Generate `.config` from the requests in `vendor/sm8150-perf_defconfig` and
+  `vendor/oplus.config`, then run `olddefconfig`.
+- Check that Kconfig retains built-in KSU, manual hooks, SUSFS and the intended
+  module policy; record any discarded options.
+- First compile `drivers/kernelsu/` and the modified fs/mm files. If that passes,
+  attempt `Image`, `dtbs` and modules, including WLAN, and inspect linked symbols.
+- Use the already installed tools: Clang 23.1.4, LLD and LLVM utilities,
+  AArch64 GNU binutils, host GCC, flex, bison and bc. Do not install or download
+  dependencies or executable toolchains.
 
-Clang 23 es un **toolchain diagnóstico**. No reproduce el Clang Android
-`r574158` usado por la base de agosto. Los resultados deben identificar esta
-diferencia; no se trasladarán a ciegas cambios para Clang 23 que alteren la
-compatibilidad del toolchain original.
+Clang 23 is a **diagnostic toolchain**. It does not reproduce Android Clang
+`r574158`, used by the August baseline. Results must identify this difference;
+changes needed for Clang 23 must not be copied blindly if they would alter
+compatibility with the original toolchain.
 
-## Aislamiento y salidas
+## Isolation and output
 
-Bubblewrap se comprobó ejecutando únicamente `/usr/bin/true` con
-`--unshare-all --die-with-parent --ro-bind / /`. El primer intento desde el
-sandbox restringido falló por NETLINK_ROUTE; el intento fuera de esa restricción
-confirmó que el aislamiento funciona sin sudo.
+Bubblewrap was checked by running only `/usr/bin/true` with
+`--unshare-all --die-with-parent --ro-bind / /`. The first attempt inside the
+restricted sandbox failed because of NETLINK_ROUTE. A subsequent attempt
+outside that restriction confirmed that isolation works without sudo.
 
-La ejecución autorizada usa ese aislamiento sin red, el sistema y las fuentes
-en solo lectura, un `/tmp` privado y un directorio nuevo de salida dentro del
-workspace como único directorio persistente escribible. No se reutilizará ni
-borrará una salida ajena. Se limitarán los trabajos a cuatro y se interrumpirá
-la ejecución si las salidas superan 8 GiB. Se conservarán comandos, resultados
-y diagnósticos en ese directorio.
+The authorized run uses no network, read-only system and source trees, a private
+`/tmp`, and a new output directory inside the workspace as its only persistent
+writable directory. It must not reuse or delete someone else's output. Limit the
+build to four jobs and stop it if output exceeds 8 GiB. Preserve commands,
+results and diagnostics in that directory.
 
-Los argumentos de Kbuild fijarán `ARCH=arm64`, `CC=/usr/bin/clang`,
+Kbuild arguments pin `ARCH=arm64`, `CC=/usr/bin/clang`,
 `CLANG_TRIPLE=aarch64-linux-gnu-`, `CROSS_COMPILE=aarch64-linux-gnu-`,
-`LD=/usr/bin/ld.lld`, `AR=/usr/bin/llvm-ar`, `NM=/usr/bin/llvm-nm` y
-`OBJCOPY=/usr/bin/llvm-objcopy`, con `O=` apuntando al directorio nuevo.
+`LD=/usr/bin/ld.lld`, `AR=/usr/bin/llvm-ar`, `NM=/usr/bin/llvm-nm` and
+`OBJCOPY=/usr/bin/llvm-objcopy`, with `O=` pointing to the new directory.
 
-Solo se ejecutarán Kbuild, sus auxiliares del árbol revisado y las herramientas
-instaladas que requieren esos objetivos. Quedan fuera los setup/install scripts,
-gestores de paquetes, extracción de OTA, empaquetado de boot, montajes de
-imágenes, ADB, fastboot y cualquier modificación del teléfono.
+Only Kbuild, its helpers from the reviewed source tree, and the installed tools
+required by those targets may run. Setup/install scripts, package managers,
+OTA extraction, boot packing, image mounts, ADB, fastboot and all device changes
+are outside this particular authorization.
 
-Una compilación completa permitiría comprobar configuración, sintaxis y enlace.
-No demostraría compatibilidad con el módulo WLAN instalado, reproducción de la
-imagen de agosto ni arranque o funcionamiento en hardware.
+A successful full build would check configuration, syntax and linkage. It would
+not demonstrate compatibility with the installed WLAN module, reproduction of
+the August image, or boot and hardware behavior.

@@ -1,71 +1,72 @@
-# Revisión posterior de la integración
+# Follow-up integration review
 
-28 de octubre de 2026. Punto de partida:
+28 October 2026. Starting point:
 `54d672f23da147c472ba31b7ba2cfb9cc965626c`.
 
-La primera validación comprobaba invariantes textuales; no era una
-comprobación completa de compilación o enlace. Esta revisión encontró dos
-errores en la integración publicada y cinco problemas adicionales en el código
-heredado. La compilación autorizada detectó además dos defectos de Kbuild,
-también corregidos. El kernel completo y WLAN compilan y enlazan.
+The first validation checked textual invariants, not a complete build or linkage.
+This review found two errors in the published integration and five further
+problems in inherited code. The authorized build found two more Kbuild defects,
+also fixed. The full kernel and WLAN compile and link.
 
-## Correcciones
+This report records that review stage. Later boot and device results are in
+[VERSION_3_4_2.md](VERSION_3_4_2.md) and [PERSISTENT_TEST.md](PERSISTENT_TEST.md).
 
-| Hallazgo | Evidencia y consecuencia | Corrección |
+## Fixes
+
+| Finding | Evidence and consequence | Fix |
 |---|---|---|
-| Resolver ausente en modo manual | `do_lookup_symbols()` llama a `ksu_lookup_kernel_symbols()`, pero su objeto solo se seleccionaba con syscall-table hooks. La configuración del producto los desactiva. | Compilar el resolver siempre e inicializarlo una vez desde `kernelsu_init()`, antes de registrar las interfaces. Retirar su inicialización exclusiva del hook dinámico. |
-| Fallback de kvcalloc incompatible con el backport | `include/linux/mm.h` ya define `kvcalloc`. El alias añadido podía convertir esa definición en una segunda `ksu_kvcalloc`, según el orden de includes. | Usar la función nativa y su comprobación `check_mul_overflow`; incluir explícitamente `linux/mm.h`. No inferir su ausencia del número 4.14. |
-| Fuga al encontrar trabajo SUSFS pendiente | `ksu_handle_extra_susfs_work()` reservaba `tw` antes de retornar por `work_pending()`, sin liberar la reserva. | Reservar después de esa salida temprana; conservar la liberación cuando falla `task_work_add()`. |
-| Firma de callback fanotify incoherente | Con SUS_MOUNT o SUS_KSTAT activos, `show_fdinfo()` esperaba tres argumentos; fanotify conservaba dos. La configuración antigua tiene FANOTIFY desactivado, pero la combinación era inválida. | Usar una firma interna uniforme de tres argumentos para inotify/fanotify y para el despachador, independientemente de las opciones SUSFS. |
-| Claim y publicación de init.rc sin exclusión | READ_ONCE/WRITE_ONCE sobre `rc_hooked` no impedían que dos lectores reclamaran simultáneamente el proxy y escribieran sus operaciones globales. | Proteger con mutex la comprobación, inicialización y publicación. Detener el hook repetido fuera del mutex. |
-| Cadenas de usuarios sin terminación comprobada | Las órdenes de rutas y uname copiaban arrays completos y después los pasaban a funciones de strings, sin exigir un NUL dentro del campo. | Validar 12 campos en 10 entradas de SUSFS y devolver ENAMETOOLONG antes de utilizarlos si falta el terminador. |
-| Reserva concurrente del cmdline compartido | Dos escritores podían superar el test del puntero y reservar buffers distintos, perdiendo una reserva. | Usar un único array estático, con la publicación y copia protegidas por el seqlock existente. |
-| Parseo inválido del Makefile de KSU | Los paréntesis literales de dos patrones grep desequilibraban `$(shell ...)` y make fallaba antes de compilar. | Buscar el identificador con `grep -wq` sin el paréntesis. |
-| Headers SELinux sin prerrequisito | La compilación parcial o paralela de KSU podía incluir `flask.h` antes de su generación en otro directorio. | Añadir a `prepare` un prerrequisito condicionado a KSU que usa la regla existente de SELinux. El resto del Makefile principal conserva el hash de la base. |
+| Resolver missing in manual mode | `do_lookup_symbols()` calls `ksu_lookup_kernel_symbols()`, but its object was selected only for syscall-table hooks, disabled by this product | Always link the resolver and initialize it once from `kernelsu_init()` before registering interfaces; remove initialization exclusive to the dynamic hook |
+| kvcalloc fallback conflicts with the backport | `include/linux/mm.h` already defines `kvcalloc`; an added alias could turn it into a second `ksu_kvcalloc`, depending on include order | Use the native function and `check_mul_overflow`; explicitly include `linux/mm.h`. Do not infer absence from the 4.14 version number |
+| Leak when SUSFS work is already pending | `ksu_handle_extra_susfs_work()` allocated `tw` before returning on `work_pending()`, without freeing it | Allocate after that early return; retain freeing when `task_work_add()` fails |
+| Inconsistent fanotify callback signature | With SUS_MOUNT or SUS_KSTAT, `show_fdinfo()` expected three arguments while fanotify retained two. The old configuration disables FANOTIFY, but the combination was invalid | Use a consistent three-argument internal signature for inotify, fanotify and the dispatcher, regardless of SUSFS options |
+| Unsynchronized init.rc claim/publication | READ_ONCE/WRITE_ONCE on `rc_hooked` did not prevent two readers claiming the proxy and writing its global operations concurrently | Protect checking, initialization and publication with a mutex; stop the repeated hook outside it |
+| Unchecked userspace string termination | Path/uname commands copied complete arrays and then passed them to string functions without requiring an in-field NUL | Validate 12 fields across ten SUSFS inputs and return ENAMETOOLONG before use if the terminator is missing |
+| Concurrent allocation of shared cmdline storage | Two writers could pass the pointer check and allocate different buffers, leaking one | Use a single static array, retaining publication/copy under the existing seqlock |
+| Invalid KSU Makefile parsing | Literal parentheses in two grep patterns unbalanced `$(shell ...)`, so make failed before compilation | Match the identifier using `grep -wq` without the parenthesis |
+| Missing SELinux header prerequisite | Partial/parallel KSU compilation could include `flask.h` before another directory generated it | Add a KSU-conditional `prepare` prerequisite using the existing SELinux rule. At this review stage, the remainder of the top-level Makefile retained the baseline hash |
 
-Se mantuvieron el DTS, el montaje de vendor, la política de firmas y los
-ajustes de producto ajenos a KSU de la base Android 16. No se sustituyó la
-imagen de arranque por una de Android 17.
+At this stage, DTS, vendor mounting, module-signing policy and non-KSU product
+settings from the Android 16 baseline were retained. The boot image was not
+replaced with an Android 17 image.
 
-## Validación ampliada
+## Expanded validation
 
-- 24 contratos de fuentes y 18 regresiones negativas. Ahora se incluye la
-  selección del resolver en modo manual, la firma fanotify, el orden de la
-  reserva en SUSFS y el mutex de init.rc. El control de alcance también
-  considera archivos nuevos no versionados, antes omitidos.
-- 8 sondas C con Clang instalado, `--target=aarch64-linux-gnu`, `-nostdinc`,
-  `-Werror` y `-fsyntax-only`. Se usan solo declaraciones extraídas y tipos
-  sintéticos: callbacks, read/exec hooks y layout de los argumentos con y sin
-  CONFIG_COMPAT. Los casos negativos deben producir el diagnóstico específico;
-  un fallo ajeno de sintaxis no se cuenta como éxito.
-- 22 casos de límites del helper de cadenas añadido localmente, con GCC, ASan
-  y UBSan y datos sintéticos. No se ejecuta código Android. LeakSanitizer no
-  funciona bajo el ptrace del sandbox y se desactiva solo en esa prueba; el
-  helper no usa heap.
-- Contrato textual del gestor 3.4.2: 23 estructuras y 20 números ioctl
-  compartidos, UAPI 5 y mínimo de driver 33188 frente a 33315.
-- APK local del gestor: SHA-256
+- 24 source contracts and 18 negative regressions, including resolver selection
+  in manual mode, fanotify signature, allocation order in SUSFS and the init.rc
+  mutex. Scope checking now also includes new untracked files, previously missed.
+- Eight C probes using installed Clang, `--target=aarch64-linux-gnu`, `-nostdinc`,
+  `-Werror` and `-fsyntax-only`. They use only extracted declarations and synthetic
+  types: callbacks, read/exec hook signatures and argument layout with/without
+  CONFIG_COMPAT. Negative cases must produce the expected diagnostic; unrelated
+  syntax failures do not count as success.
+- 22 boundary cases for the added pure string helper, using GCC, ASan/UBSan and
+  synthetic data. No Android code runs. LeakSanitizer does not work under this
+  sandbox's ptrace restriction and is disabled only for this allocation-free test.
+- Textual manager 3.4.2 contract: 23 shared structures, 20 shared ioctl numbers,
+  UAPI 5 and minimum driver 33188, compared with driver 33315 at this stage.
+- Local manager APK SHA-256:
   `774a5511f7034a4930e881114e202319cbdc34c5aaaa5c7c6b6d2902364e4c58`,
-  coincidente con el digest del asset público previamente descargado como
-  metadatos. Certificado v2 de 998 bytes y SHA-256
+  matching the public asset digest previously retrieved as metadata. Its 998-byte
+  v2 certificate has SHA-256
   `79e590113c4c4c0c222978e413a5faa801666957b1212a328e46c00c69821bf7`,
-  coincidente con la identidad esperada por el driver. Se extrajeron datos;
-  no se ejecutó el APK ni se verificó criptográficamente su firma completa.
-- `git diff --check` y comprobación de alcance contra la base Android 16.
-- Kconfig, compilación de objetos afectados y compilación completa de Image,
-  20 DTB y cinco módulos con Clang/LLD 23.1.4, sin errores. Los 394 CRC
-  versionados de WLAN (incluido module_layout) y los de los otros cuatro
-  módulos coinciden con Module.symvers. Detalles, avisos heredados, hashes y
-  límites en [BUILD_RESULTS.md](BUILD_RESULTS.md).
+  matching the identity expected by the driver. At this review stage, data was
+  extracted; the APK was not run and its complete signature had not yet been
+  verified cryptographically. Later verification is recorded separately.
+- `git diff --check` and scope checks against the Android 16 baseline.
+- Kconfig, modified objects and a full build of Image, 20 DTBs and five modules
+  with Clang/LLD 23.1.4, without errors. All 394 versioned WLAN CRCs, including
+  module_layout, and the other four modules' CRCs match Module.symvers. Details,
+  inherited warnings, hashes and limits are in [BUILD_RESULTS.md](BUILD_RESULTS.md).
 
-## Límites que permanecen
+## Remaining limits at this review stage
 
-La compilación usa Clang 23 como diagnóstico; no reproduce el toolchain
-Android original. Posteriormente se contrastaron los 394 CRC del WLAN instalado
-y se preparó el [candidato boot](FLASH_CANDIDATE.md). No hay validación de arranque,
-root efectivo, SELinux, suspensión, consumo o comportamiento de SUSFS.
+Compilation uses diagnostic Clang 23, not the original Android toolchain. The
+installed WLAN module's 394 CRCs were subsequently compared and a
+[boot candidate](FLASH_CANDIDATE.md) was prepared. At this stage there was no
+validation of boot, effective root, SELinux, suspend, power consumption or SUSFS
+behavior on hardware.
 
-El commit exacto de la imagen de agosto continúa sin recuperarse. No se
-certifica ausencia de malware ni compatibilidad del daily driver. La ejecución
-del [plan aislado de Kbuild](BUILD_CHECK_PLAN.md) fue autorizada específicamente
-por el usuario, sin instalar dependencias, sin red y sin acceso al teléfono.
+The exact August image commit remained unrecovered. This does not certify
+absence of malware or compatibility with a daily driver. The user specifically
+authorized the [isolated Kbuild plan](BUILD_CHECK_PLAN.md), with no dependency
+installation, network or device access during that build-only stage.
