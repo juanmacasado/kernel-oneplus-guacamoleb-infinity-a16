@@ -61,7 +61,8 @@ imagen de arranque por una de Android 17.
 ## Límites que permanecen
 
 La compilación usa Clang 23 como diagnóstico; no reproduce el toolchain
-Android original. No hay validación de módulos instalados, arranque,
+Android original. Posteriormente se contrastaron los 394 CRC del WLAN instalado
+y se preparó el [candidato boot](FLASH_CANDIDATE.md). No hay validación de arranque,
 root efectivo, SELinux, suspensión, consumo o comportamiento de SUSFS.
 
 El commit exacto de la imagen de agosto continúa sin recuperarse. No se

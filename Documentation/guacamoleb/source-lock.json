@@ -136,7 +136,7 @@
   "validation": {
     "compiled": true,
     "device_tested": false,
-    "boot_image_produced": false,
+    "boot_image_produced": true,
     "static_checker": "tools/guacamoleb/verify_integration.py --self-test",
     "compiled_source_commit": "30a151d718fb5b91ad20f44c5a1f16fade51de26",
     "compiler": "Clang 23.1.4 (diagnostic; not Android r574158)",
@@ -147,7 +147,13 @@
     ],
     "build_result": "Documentation/guacamoleb/build-result.json",
     "installed_rom_modules_validated": false,
-    "section_mismatch_warnings": 4
+    "section_mismatch_warnings": 4,
+    "boot_candidate_sha256": "edaabd74693d0cf215e64c21817d1aa9662236eb3c05921569140c6fbccda6af",
+    "boot_candidate_report": "Documentation/guacamoleb/FLASH_CANDIDATE.md",
+    "boot_tested": false,
+    "device_readonly_inspected": true,
+    "installed_wlan_crc_validated": true,
+    "installed_wlan_versioned_symbols": 394
   },
   "review": {
     "reviewed_start_commit": "54d672f23da147c472ba31b7ba2cfb9cc965626c",

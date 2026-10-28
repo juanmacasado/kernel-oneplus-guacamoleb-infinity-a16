@@ -4,6 +4,8 @@
 en el commit `30a151d718fb5b91ad20f44c5a1f16fade51de26`.
 Las actualizaciones posteriores de documentación no forman parte del binario.
 El inventario y los hashes SHA-256 están en [build-result.json](build-result.json).
+Este documento describe la fase de compilación; el candidato boot preparado
+posteriormente se documenta en [FLASH_CANDIDATE.md](FLASH_CANDIDATE.md).
 
 ## Entorno y autorización
 

@@ -5,8 +5,9 @@ Android 16**, preparada el 28 de octubre de 2026.
 
 El código integra KernelSU Next legacy actualizado y SUSFS **2.3.0** sobre la
 rama Android 16 de Harish. **Compilan y enlazan Image, 20 DTB y los cinco
-módulos con Clang 23. No está probado en hardware ni hay un boot.img nuevo
-listo para instalar.** El resultado y los hashes están en
+módulos con Clang 23. Hay un candidato boot empaquetado, sin prueba de arranque.**
+Los insumos del teléfono y el candidato están en [FLASH_CANDIDATE.md](FLASH_CANDIDATE.md).
+El resultado de compilación y los hashes están en
 [BUILD_RESULTS.md](BUILD_RESULTS.md) y [build-result.json](build-result.json).
 
 ## Base y procedencia
@@ -42,7 +43,7 @@ Se añadió la inclusión del driver en `drivers/Kconfig` y `drivers/Makefile`.
 Se conservan los DTS/DTB de la base Android 16, su esquema de montaje de vendor,
 la política de firma de módulos y todos los ajustes de producto ajenos a KSU.
 La actualización no importa el ramdisk, recovery, fstab o política de la ROM
-Android 17. No se ha reempaquetado ninguna imagen ni alterado firmware.
+Android 17. El candidato sustituye solo el kernel del backup Android 16.
 
 Cambios específicos para la integración:
 
@@ -123,22 +124,24 @@ con cuatro avisos heredados de secciones en el código OPlus de inicialización.
 Los CRC de los cinco módulos generados coinciden con sus exportaciones;
 esto no valida los módulos que lleva instalada la ROM ni el arranque.
 
-## Pendiente antes de producir una imagen
+## Pendiente antes de una instalación
 
 1. Repetir la compilación de publicación con el toolchain Android adecuado.
    El árbol Android 16 común consultado selecciona Clang `r574158`; no se ha
    descargado ni ejecutado ese toolchain durante esta integración.
-2. Contrastar los módulos de la ROM concreta con el candidato. La base
+2. Completar la comprobación de módulos y funcionamiento. Los 394 CRC del
+   WLAN instalado ya coinciden con el candidato. La base
    conserva un bypass de CRC para `wlan`
    cuando KSU está activo; ese bypass no demuestra que el módulo sea compatible.
-3. Obtener y contrastar los módulos y el boot original de la ROM exacta.
-   Preparar un candidato con su ramdisk Android 16 y componentes coherentes,
-   conservar hashes y revisar el resultado offline.
+3. Revisar el candidato preparado con el backup exacto de boot_a, sus hashes
+   y la documentación de recuperación. Contrastar también los módulos de
+   usuarios KernelSU/SUSFS antes de la prueba funcional.
 4. Plantear por separado cualquier prueba en hardware. No hay comandos de
    instalación o flash en este documento.
 
 Se ejecutaron las comprobaciones locales y, tras autorización específica,
 Kbuild y sus auxiliares en aislamiento sin red, con fuentes en solo lectura
-y menos de 1 GiB de salida frente al límite de 8 GiB. No se ejecutaron setup
-scripts o binarios Android; no se instalaron dependencias, extrajeron OTA,
-montaron imágenes ni accedió al teléfono.
+y menos de 1 GiB de salida frente al límite de 8 GiB. Posteriormente el usuario
+autorizó lecturas ADB, la copia de boot_a y el empaquetado local. No se ejecutaron
+setup scripts, instalaron dependencias, extrajeron OTA ni montaron imágenes.
+No se reinició, desbloqueó o flasheó el teléfono.
