@@ -115,12 +115,12 @@
     ]
   },
   "integration_commit": "54809cff301eab00b763fbdaa2acee1c40477a9a",
-  "reported_driver_version": 33315,
-  "reported_driver_tag": "v3.4.0-legacy-a16-susfs2.3",
+  "reported_driver_version": 33355,
+  "reported_driver_tag": "v3.4.2-legacy-a16-susfs2.3",
   "manager_interface": {
     "manager_release": "v3.4.2",
     "manager_min_kernel_version": 33188,
-    "driver_version": 33315,
+    "driver_version": 33355,
     "driver_uapi": 5,
     "manager_uapi": 5,
     "shared_structures": 23,
@@ -153,7 +153,9 @@
     "boot_tested": false,
     "device_readonly_inspected": true,
     "installed_wlan_crc_validated": true,
-    "installed_wlan_versioned_symbols": 394
+    "installed_wlan_versioned_symbols": 394,
+    "new_v342_port_compiled": false,
+    "new_v342_port_device_tested": false
   },
   "review": {
     "reviewed_start_commit": "54d672f23da147c472ba31b7ba2cfb9cc965626c",
@@ -170,6 +172,19 @@
     "bounded_string_sanitizers": [
       "address",
       "undefined"
+    ]
+  },
+  "driver_release_port": {
+    "official_release": "v3.4.2",
+    "official_release_commit": "4c706b5938665866ebe16944a481a7b91e3396af",
+    "reviewed_delta": "v3.4.0...v3.4.2, 61 upstream commits",
+    "backend": "legacy 4.14 manual hooks with inline SUSFS, not upstream GKI/LKM backend",
+    "port_notes": "Documentation/guacamoleb/VERSION_3_4_2.md",
+    "newly_integrated": [
+      "native module_blacklist opt-in",
+      "post-fs-data forced-feature retry",
+      "RCU-protected policy reads under policy mutex",
+      "fixed legacy force_feature parser end-of-input overread"
     ]
   }
 }

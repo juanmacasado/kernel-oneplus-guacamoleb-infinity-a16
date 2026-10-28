@@ -28,6 +28,7 @@
 #endif // #ifdef CONFIG_KSU_SUSFS
 #include "selinux/selinux.h"
 #include "feature/sulog.h"
+#include "feature/module_blacklist.h"
 
 extern void __init ksu_lsm_hook_init(void);
 extern int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
@@ -129,6 +130,8 @@ int __init kernelsu_init(void)
     }
 
 	ksu_init_symbol_resolver();
+	/* v3.4.2: default is empty; block only explicitly configured modules. */
+	ksu_module_blacklist_init();
 	ksu_feature_init();
 
 	ksu_sulog_init();
@@ -165,6 +168,7 @@ int __init kernelsu_init(void)
 
 		ksu_boot_completed = true;
 		track_throne(false);
+		ksu_feature_apply_forced();
 
 		if (!getenforce()) {
 			pr_info("Permissive SELinux, enforcing\n");
@@ -230,6 +234,7 @@ void __exit kernelsu_exit(void)
 	ksu_shell_su_adb_only_exit();
 
 	ksu_feature_exit();
+	ksu_module_blacklist_exit();
 
 	if (ksu_cred) {
 		put_cred(ksu_cred);

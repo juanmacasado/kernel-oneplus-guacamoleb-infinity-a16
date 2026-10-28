@@ -2,6 +2,7 @@ kernelsu-objs := core/init.o
 
 kernelsu-objs += compat/kernel_compat.o
 kernelsu-objs += feature/kernel_umount.o
+kernelsu-objs += feature/module_blacklist.o
 kernelsu-objs += feature/sulog.o
 kernelsu-objs += feature/sucompat.o
 kernelsu-objs += feature/shell_su_adb_only.o
@@ -78,26 +79,13 @@ obj-$(CONFIG_KSU) += kernelsu.o
 LPATH := /usr/bin/env PATH="$$PATH":/usr/bin:/usr/local/bin
 MDIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-# Vendored legacy + SUSFS integration from Harish b1d34c4a99ea.
-# Base driver: sidex15 d999a2af + KernelSU-Next legacy 0b17f242.
-# Selected applicable fixes from legacy 165b87fa99ab are applied locally.
-# There is no upstream v3.4.2 legacy tag. Keep the inherited numeric ABI
-# version, but identify this integration honestly rather than as a release.
-KSU_GIT_VERSION := 3026
-KSU_GIT_TAG := v3.4.0-legacy-a16-susfs2.3
-KSU_GIT_VERSION_VALID := 1
-
-# Calculate version if git version is available
-ifdef KSU_GIT_VERSION_VALID
-$(eval KSU_VERSION=$(shell expr 30000 + $(KSU_GIT_VERSION) + 289))
-$(info -- KernelSU-Next version: $(KSU_VERSION))
-else
-# If there is no .git directory, use default version
-$(warning "KSU_GIT_VERSION not defined! It is better to make KernelSU-Next a git repository!")
-KSU_VERSION_FALLBACK := 1
-$(info -- KernelSU-Next version fallback: $(KSU_VERSION_FALLBACK))
-KSU_VERSION := $(KSU_VERSION_FALLBACK)
-endif
+# Linux 4.14 legacy port with applicable v3.4.2 changes audited against
+# KernelSU-Next 4c706b5938665866ebe16944a481a7b91e3396af.
+# Keep manual hooks and inline SUSFS; the upstream GKI hook/LKM backend is not
+# interchangeable with this vendor kernel. This suffix identifies the port.
+# Pin release ABI numbering explicitly; do not invent a Git commit count.
+KSU_VERSION := 33355
+KSU_VERSION_TAG := v3.4.2-legacy-a16-susfs2.3
 
 # Allow integrators to pin the reported version (e.g. when backporting
 # onto release branches where the commit count does not match releases)
@@ -105,15 +93,8 @@ ifdef KSU_VERSION_OVERRIDE
 KSU_VERSION := $(KSU_VERSION_OVERRIDE)
 $(info -- KernelSU-Next version override: $(KSU_VERSION))
 endif
+$(info -- KernelSU-Next version: $(KSU_VERSION))
 ccflags-y += -DKSU_VERSION=$(KSU_VERSION)
-
-ifdef KSU_GIT_VERSION_VALID
-$(eval KSU_VERSION_TAG=$(KSU_GIT_TAG))
-else
-$(warning "KSU_VERSION_TAG not defined! It is better to make KernelSU-Next a git submodule!")
-KSU_VERSION_TAG_FALLBACK := v0.0.1
-KSU_VERSION_TAG=$(KSU_VERSION_TAG_FALLBACK)
-endif
 
 ifdef KSU_VERSION_TAG_OVERRIDE
 KSU_VERSION_TAG := $(KSU_VERSION_TAG_OVERRIDE)

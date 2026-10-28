@@ -5,6 +5,7 @@
 #include <linux/workqueue.h>
 
 #include "policy/allowlist.h"
+#include "policy/feature.h"
 #include "klog.h" // IWYU pragma: keep
 #include "runtime/ksud_boot.h"
 #include "runtime/ksud.h"
@@ -73,6 +74,8 @@ void on_post_fs_data(void)
 	// sanity check, this may influence the performance
 	stop_input_hook();
 	ksu_selinux_hide_handle_post_fs_data();
+	/* v3.4.2: retry handlers which required the policy backup. */
+	ksu_feature_apply_forced();
 }
 
 extern void ext4_unregister_sysfs(struct super_block *sb);
