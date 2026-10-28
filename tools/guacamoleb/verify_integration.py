@@ -9,6 +9,7 @@ import re
 import subprocess
 
 BASE = "943be052999e4d65f805f8c6a5f22b44ad832683"
+UPSTREAM = "b1d34c4a99eaed5531333781ec8f389c53b9bad9"
 ROOT = Path(__file__).resolve().parents[2]
 KSU = "drivers/kernelsu/"
 CONFIG = "arch/arm64/configs/vendor/oplus.config"
@@ -43,6 +44,9 @@ def config_values(text):
     return out
 
 
+UPSTREAM_FILES = set(git("diff", "--name-only", BASE, UPSTREAM).splitlines())
+
+
 def validate(read, changed, original_config):
     checks = {}
     make = read(KSU + "Makefile")
@@ -61,18 +65,39 @@ def validate(read, changed, original_config):
         "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG",
         "CONFIG_KSU_SUSFS_OPEN_REDIRECT", "CONFIG_KSU_SUSFS_SUS_MAP",
     ]) and cfg.get("CONFIG_KSU_SUSFS_SUS_MEMFD") == "n"
+    expected_product = {k: v for k, v in original.items() if not k.startswith("CONFIG_KSU")}
+    expected_product.update({"CONFIG_QCA_CLD_WLAN": "y", "CONFIG_LTO_CLANG": "n",
+        "CONFIG_LTO_NONE": "y", "CONFIG_SHADOW_CALL_STACK": "n", "CONFIG_IPV6_MROUTE": "y",
+        "CONFIG_INITRAMFS_IGNORE_SKIP_FLAG": "n",
+        "CONFIG_PROC_CMDLINE_APPEND_ANDROID_FORCE_NORMAL_BOOT": "n",
+        "CONFIG_BBG_BLOCK_BOOT": "n", "CONFIG_BBG_BLOCK_RECOVERY": "n"})
     checks["non_root_product_settings_preserved"] = {
         k: v for k, v in cfg.items() if not k.startswith("CONFIG_KSU")
-    } == {k: v for k, v in original.items() if not k.startswith("CONFIG_KSU")}
+    } == expected_product
     header_rule = 'ifdef CONFIG_KSU\n# KSU includes private SELinux headers from another build directory.\n# Generate them once before parallel compilation, including partial builds.\nPHONY += prepare-ksu-selinux\nprepare: prepare-ksu-selinux\nprepare-ksu-selinux: scripts\n\t$(Q)$(MAKE) $(build)=security/selinux security/selinux/flask.h\nendif\n\n'
     top_make = read("Makefile")
-    checks["root_kbuild_only_adds_selinux_header_prerequisite"] = (
+    checks["root_kbuild_matches_harish_plus_selinux_prerequisite"] = (
         top_make.count(header_rule) == 1
-        and hashlib.sha256(top_make.replace(header_rule, "").encode()).hexdigest() == "3b65a6dbae2324fbafe2ae303bec4917caaf8128d5f0500714f65e5eaa836978"
+        and hashlib.sha256(top_make.replace(header_rule, "").encode()).hexdigest() == "3acb713adf084e9561a7f303bb087da4fd9b6b47f39c5fd576bfb88aaee84b38"
     )
     checks["scope_preserves_android16_boot_and_drivers"] = all(
         p.startswith((KSU, "Documentation/guacamoleb/", "tools/guacamoleb/"))
-        or p in SUSFS_FILES | INTEGRATION_FILES for p in changed
+        or p in SUSFS_FILES | INTEGRATION_FILES | UPSTREAM_FILES for p in changed
+    )
+    checks["android16_fstab_nodes_preserved"] = all(
+        'compatible = "android,fstab";' in read("arch/arm64/boot/dts/" + board + "/sm8150.dtsi")
+        and 'fsmgr_flags = "wait,slotselect,avb";' in read("arch/arm64/boot/dts/" + board + "/sm8150.dtsi")
+        for board in ["18821", "18857", "18865", "19801", "19863", "qcom"]
+    )
+    checks["cmdline_append_has_capacity_guard"] = (
+        'strlcpy(proc_command_line, saved_command_line, sizeof(proc_command_line));' in read("fs/proc/cmdline.c")
+        and 'sizeof(proc_command_line) - cmdline_len >=' in read("fs/proc/cmdline.c")
+        and 'sizeof(" " ANDROID_FORCE_NORMAL_BOOT_STR)' in read("fs/proc/cmdline.c")
+        and 'strlcat(proc_command_line' in read("fs/proc/cmdline.c")
+    )
+    checks["android16_charger_abi_kept"] = (
+        "POWER_SUPPLY_PROP_BATTERY_SOH" in read("drivers/power/oplus/charger_ic/oplus_battery_msm8150Q.c")
+        and "oplus_chg_configfs_init(oplus_chip)" not in read("drivers/power/oplus/charger_ic/oplus_battery_msm8150Q.c")
     )
     checks["driver_reachable_from_kbuild_and_kconfig"] = (
         'source "drivers/kernelsu/Kconfig"' in read("drivers/Kconfig")
@@ -235,6 +260,11 @@ def main():
         ("fs/susfs.c", "static char fake_cmdline_or_bootconfig[SUSFS_FAKE_CMDLINE_OR_BOOTCONFIG_SIZE];", "static char *fake_cmdline_or_bootconfig;", "cmdline_buffer_has_single_static_storage"),
         ("include/linux/susfs.h", "KSTAT_SPOOF_CTIME_TV_SEC (1 << 8)", "KSTAT_SPOOF_CTIME_TV_SEC (1 < 8)", "susfs_2_3_and_correct_ctime_mask"),
     ]
+    mutations += [
+        ("fs/proc/cmdline.c", "sizeof(proc_command_line) - cmdline_len >=", "0 >=", "cmdline_append_has_capacity_guard"),
+        ("arch/arm64/boot/dts/18857/sm8150.dtsi", 'compatible = "android,fstab";', 'compatible = "removed,fstab";', "android16_fstab_nodes_preserved"),
+        (CONFIG, "CONFIG_QCA_CLD_WLAN=y", "CONFIG_QCA_CLD_WLAN=m", "non_root_product_settings_preserved"),
+    ]
     regression_count = 0
     if args.self_test:
         for path, old, new, check in mutations:
@@ -244,7 +274,7 @@ def main():
             result = validate(lambda p: mutated if p == path else read(p), changed, original)
             assert not result[check], ("regression not detected", check)
             regression_count += 1
-        assert not validate(read, [*changed, "arch/arm64/boot/dts/qcom/sm8150.dtsi"], original)[
+        assert not validate(read, [*changed, "drivers/net/unreviewed_driver.c"], original)[
             "scope_preserves_android16_boot_and_drivers"]
         regression_count += 1
     print(json.dumps({"checks": checks, "negative_regressions": regression_count,
