@@ -234,7 +234,6 @@ void __init ksu_syscall_table_hook_init(void)
 	};
 	int i, patched = 0;
 
-	ksu_init_symbol_resolver();
 
 	ksu_sth_syscall_table =
 		(syscall_fn_t *)ksu_resolve_symbol_for_functable_hook(

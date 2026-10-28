@@ -29,27 +29,17 @@ extern void susfs_sus_kstat_spoof_inotify_fdinfo(unsigned long *out_target_ino, 
 
 #if defined(CONFIG_INOTIFY_USER) || defined(CONFIG_FANOTIFY)
 
-#if defined(CONFIG_KSU_SUSFS_SUS_MOUNT) || defined(CONFIG_KSU_SUSFS_SUS_KSTAT)
 static void show_fdinfo(struct seq_file *m, struct file *f,
 			void (*show)(struct seq_file *m,
 				     struct fsnotify_mark *mark,
 					 struct file *file))
-#else
-static void show_fdinfo(struct seq_file *m, struct file *f,
-			void (*show)(struct seq_file *m,
-				     struct fsnotify_mark *mark))
-#endif
 {
 	struct fsnotify_group *group = f->private_data;
 	struct fsnotify_mark *mark;
 
 	mutex_lock(&group->mark_mutex);
 	list_for_each_entry(mark, &group->marks_list, g_list) {
-#if defined(CONFIG_KSU_SUSFS_SUS_MOUNT) || defined(CONFIG_KSU_SUSFS_SUS_KSTAT)
 		show(m, mark, f);
-#else
-		show(m, mark);
-#endif
 		if (seq_has_overflowed(m))
 			break;
 	}
@@ -91,11 +81,7 @@ static void show_mark_fhandle(struct seq_file *m, struct inode *inode)
 
 #ifdef CONFIG_INOTIFY_USER
 
-#if defined(CONFIG_KSU_SUSFS_SUS_MOUNT) || defined(CONFIG_KSU_SUSFS_SUS_KSTAT)
 static void inotify_fdinfo(struct seq_file *m, struct fsnotify_mark *mark, struct file *file)
-#else
-static void inotify_fdinfo(struct seq_file *m, struct fsnotify_mark *mark)
-#endif
 {
 	struct inotify_inode_mark *inode_mark;
 	struct inode *inode;
@@ -185,7 +171,7 @@ void inotify_show_fdinfo(struct seq_file *m, struct file *f)
 
 #ifdef CONFIG_FANOTIFY
 
-static void fanotify_fdinfo(struct seq_file *m, struct fsnotify_mark *mark)
+static void fanotify_fdinfo(struct seq_file *m, struct fsnotify_mark *mark, struct file *file)
 {
 	unsigned int mflags = 0;
 	struct inode *inode;

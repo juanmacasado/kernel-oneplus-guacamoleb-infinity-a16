@@ -138,5 +138,17 @@
     "device_tested": false,
     "boot_image_produced": false,
     "static_checker": "tools/guacamoleb/verify_integration.py --self-test"
+  },
+  "review": {
+    "reviewed_start_commit": "54d672f23da147c472ba31b7ba2cfb9cc965626c",
+    "static_checks": 21,
+    "negative_regressions": 16,
+    "syntax_only_c_probes": 8,
+    "native_kvcalloc_backport_used": true,
+    "manager_apk_sha256": "774a5511f7034a4930e881114e202319cbdc34c5aaaa5c7c6b6d2902364e4c58",
+    "manager_certificate_size": 998,
+    "manager_certificate_sha256": "79e590113c4c4c0c222978e413a5faa801666957b1212a328e46c00c69821bf7",
+    "manager_digest_and_certificate_match": true,
+    "apk_signature_cryptography_verified": false
   }
 }

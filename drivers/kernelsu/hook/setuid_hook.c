@@ -63,13 +63,14 @@ static void susfs_handle_setuid_tw_func(struct callback_head *cb)
 
 static void ksu_handle_extra_susfs_work(void)
 {
-    struct susfs_handle_setuid_tw *tw = kzalloc(sizeof(*tw), GFP_ATOMIC);
+    struct susfs_handle_setuid_tw *tw;
 
     if (work_pending(&susfs_extra_works))
         return;
 
     schedule_work(&susfs_extra_works);
 
+    tw = kzalloc(sizeof(*tw), GFP_ATOMIC);
     if (!tw) {
         pr_err("susfs: No enough memory\n");
         return;

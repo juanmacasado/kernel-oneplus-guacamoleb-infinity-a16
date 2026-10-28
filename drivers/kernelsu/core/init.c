@@ -19,6 +19,7 @@
 #include "supercall/supercall.h"
 #include "ksu.h"
 #include "infra/file_wrapper.h"
+#include "infra/symbol_resolver.h"
 #include "feature/adb_root.h"
 #include "feature/selinux_hide.h"
 #include "feature/shell_su_adb_only.h"
@@ -127,6 +128,7 @@ int __init kernelsu_init(void)
         return -ENOSYS;
     }
 
+	ksu_init_symbol_resolver();
 	ksu_feature_init();
 
 	ksu_sulog_init();

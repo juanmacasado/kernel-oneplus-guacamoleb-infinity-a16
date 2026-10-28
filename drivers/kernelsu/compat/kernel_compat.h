@@ -8,6 +8,7 @@
 #include <linux/uaccess.h>
 #include <linux/fdtable.h> // IWYU pragma: keep
 #include <linux/slab.h>
+#include <linux/mm.h>
 #include "ss/policydb.h"
 #include "linux/key.h"
 #include "arch.h"
@@ -88,15 +89,6 @@ static inline void ksu_kvfree(const void *buf)
 }
 #define kvmalloc ksu_kvmalloc
 #define kvfree ksu_kvfree
-#endif
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 18, 0)
-/* Adapted from legacy 165b87fa99ab; kcalloc checks multiplication overflow. */
-static inline void *ksu_kvcalloc(size_t n, size_t size, gfp_t flags)
-{
-	return kcalloc(n, size, flags);
-}
-#define kvcalloc ksu_kvcalloc
 #endif
 
 // https://elixir.bootlin.com/linux/v4.14.222/source/lib/string.c#L282

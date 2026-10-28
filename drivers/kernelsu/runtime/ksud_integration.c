@@ -25,6 +25,7 @@
 #include <linux/uaccess.h>
 #include <linux/namei.h>
 #include <linux/workqueue.h>
+#include <linux/mutex.h>
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 #include <linux/sched/signal.h>
 #else
@@ -428,16 +429,17 @@ static bool is_init_rc(struct file *fp)
 
 static void ksu_apply_init_rc_proxy(struct file *file)
 {
-    // we only process the first read
-    // READ_ONCE/WRITE_ONCE: this runs from the read(2) path and can be
-    // entered concurrently on two descriptors of init.rc.
+    /* Serialize the claim and publication of the shared file operations. */
+    static DEFINE_MUTEX(rc_proxy_lock);
     static bool rc_hooked = false;
-    if (READ_ONCE(rc_hooked)) {
+
+    mutex_lock(&rc_proxy_lock);
+    if (rc_hooked) {
+        mutex_unlock(&rc_proxy_lock);
         // we don't need these kprobe, unregister it!
         stop_init_rc_hook();
         return;
     }
-    WRITE_ONCE(rc_hooked, true);
 
     // now we can sure that the init process is reading
     // `/system/etc/init/init.rc`
@@ -459,6 +461,8 @@ static void ksu_apply_init_rc_proxy(struct file *file)
     }
     // replace the file_operations
     file->f_op = &fops_proxy;
+    rc_hooked = true;
+    mutex_unlock(&rc_proxy_lock);
 }
 
 void ksu_handle_sys_read(unsigned int fd)

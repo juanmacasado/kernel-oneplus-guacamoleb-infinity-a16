@@ -53,8 +53,8 @@ Cambios específicos para la integración:
 - El registro de sucompat manual incluye el ejecutable; no registra los
   argumentos completos. Evita interpretar `struct user_arg_ptr` como un
   array de punteros de kernel, que era lo que hacía el código importado.
-- El fallback de `kvcalloc` usa `kcalloc`, que comprueba el desbordamiento de
-  la multiplicación. Se corrigen inclusiones y precedencia de headers.
+- Se usa `kvcalloc` nativo, ya retroportado en este árbol y con comprobación
+  de desbordamiento. Se corrigen inclusiones y precedencia de headers.
 - Se conserva el acceso mediante `flex_array` que realmente usa SELinux en
   este árbol 4.14. No se copia el cambio genérico de legacy que lo sustituye
   por acceso directo a un array basándose solo en el número de versión.
@@ -87,15 +87,25 @@ Desde la raíz de este repositorio:
 
 ```text
 python3 tools/guacamoleb/verify_integration.py --self-test
+python3 tools/guacamoleb/check_c_contracts.py
 git diff --no-ext-diff --no-textconv --check 943be052999e4d65f805f8c6a5f22b44ad832683
 ```
 
-Pasan **17 comprobaciones estáticas y 12 regresiones negativas**. Comprueban
+Pasan **21 comprobaciones estáticas y 16 regresiones negativas**. Comprueban
 la inclusión del driver, selección de hooks, firmas de las interfaces,
 fuentes de objetos, backports, layout SELinux y preservación del alcance.
 Las regresiones introducen en memoria errores como desactivar KSU, cambiar la
 firma de módulos, restaurar un hook antiguo o tocar el DTS, y exigen detectarlos.
 El helper es de lectura: no ejecuta Kbuild ni código del kernel ni usa red.
+
+Se añaden **8 sondas C de solo sintaxis para AArch64**, con declaraciones
+extraídas del árbol y datos sintéticos. Contrastan callbacks, firmas de hooks
+y layout de `user_arg_ptr`; tres casos deben fallar por el diagnóstico previsto.
+No ejecutan Kbuild ni código del kernel.
+
+La [revisión completa](REVIEW.md) documenta los errores detectados después de
+la primera publicación y sus correcciones. El [plan de Kbuild](BUILD_CHECK_PLAN.md)
+delimita la comprobación de compilación propuesta.
 
 Estas comprobaciones no sustituyen Kconfig, compilación, enlace, validación de
 ABI de módulos, arranque o pruebas funcionales. El estado estático aprobado

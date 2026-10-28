@@ -15,6 +15,7 @@ kernelsu-objs += tiny_sulog.o
 
 kernelsu-objs += infra/file_wrapper.o
 kernelsu-objs += infra/event_queue.o
+kernelsu-objs += infra/symbol_resolver.o
 kernelsu-objs += infra/seccomp_cache.o
 kernelsu-objs += infra/su_mount_ns.o
 
@@ -155,7 +156,6 @@ ccflags-y += -DKSU_SYSCALL_TABLE_HOOK
 HAVE_KSU_HOOK := 0
 kernelsu-objs += hook/patch_memory.o
 kernelsu-objs += hook/syscall_table_hook.o
-kernelsu-objs += infra/symbol_resolver.o
 endif
 
 ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)

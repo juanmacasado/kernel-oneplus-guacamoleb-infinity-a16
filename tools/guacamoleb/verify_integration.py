@@ -112,9 +112,36 @@ def validate(read, changed, original_config):
                            read(KSU + "feature/sucompat.c")))
     )
     checks["legacy_allocations_check_overflow"] = (
-        "return kcalloc(n, size, flags);" in read(KSU + "compat/kernel_compat.h")
-        and "#define kvcalloc ksu_kvcalloc" in read(KSU + "compat/kernel_compat.h")
+        "#include <linux/mm.h>" in read(KSU + "compat/kernel_compat.h")
+        and "#define kvcalloc" not in read(KSU + "compat/kernel_compat.h")
+        and "check_mul_overflow(n, size, &bytes)" in read("include/linux/mm.h")
+        and "return kvmalloc_array(n, size, flags | __GFP_ZERO);" in read("include/linux/mm.h")
         and '#include "compat/kernel_compat.h"' in read(KSU + "supercall/dispatch.c")
+    )
+    resolver_assignment = "kernelsu-objs += infra/symbol_resolver.o"
+    dynamic_hook_block = make.split("ifeq ($(CONFIG_KSU_SYSCALL_TABLE_HOOK), y)", 1)[1].split("endif", 1)[0]
+    checks["resolver_available_in_manual_mode"] = (
+        make.count(resolver_assignment) == 1 and resolver_assignment not in dynamic_hook_block
+        and "ksu_init_symbol_resolver();" in read(KSU + "core/init.c")
+        and "ksu_init_symbol_resolver();" not in read(KSU + "hook/syscall_table_hook.c")
+    )
+    fdinfo = read("fs/notify/fdinfo.c")
+    checks["fdinfo_callbacks_have_consistent_signatures"] = all(
+        f"static void {name}(struct seq_file *m, struct fsnotify_mark *mark, struct file *file)" in fdinfo
+        for name in ["inotify_fdinfo", "fanotify_fdinfo"]
+    ) and "show(m, mark, f);" in fdinfo and "show(m, mark);" not in fdinfo
+    work = read(KSU + "hook/setuid_hook.c").split("static void ksu_handle_extra_susfs_work(void)", 1)[1].split("\n}", 1)[0]
+    checks["susfs_work_does_not_leak_on_pending_branch"] = (
+        work.index("if (work_pending(") < work.index("kzalloc(sizeof(*tw)")
+        and "kfree(tw);" in work
+    )
+    proxy = read(KSU + "runtime/ksud_integration.c").split("static void ksu_apply_init_rc_proxy(struct file *file)", 1)[1].split("\n}", 1)[0]
+    checks["init_rc_proxy_claim_and_publication_serialized"] = (
+        "static DEFINE_MUTEX(rc_proxy_lock);" in proxy
+        and "mutex_lock(&rc_proxy_lock);" in proxy
+        and proxy.index("mutex_lock(&rc_proxy_lock);") < proxy.index("if (rc_hooked)")
+        and proxy.index("file->f_op = &fops_proxy;") < proxy.index("rc_hooked = true;")
+        and proxy.count("mutex_unlock(&rc_proxy_lock);") == 2
     )
     checks["selinux_layout_matches_this_4_14_tree"] = (
         "struct flex_array *htable;" in read("security/selinux/ss/avtab.h")
@@ -153,7 +180,8 @@ def main():
             cache[path] = file.read_text() if file.is_file() else ""
         return cache[path]
 
-    changed = git("diff", "--no-ext-diff", "--no-textconv", "--name-only", BASE).splitlines()
+    changed = sorted(set(git("diff", "--no-ext-diff", "--no-textconv", "--name-only", BASE).splitlines()
+                         + git("ls-files", "--others", "--exclude-standard").splitlines()))
     original = git("show", BASE + ":" + CONFIG)
     checks = validate(read, changed, original)
     mutations = [
@@ -166,7 +194,11 @@ def main():
         ("fs/exec.c", "ksu_handle_execveat(&fd, &filename, &argv, &envp, &flags);", "ksu_handle_execveat((int *)AT_FDCWD, &filename, &argv, &envp, 0);", "exec_hook_covers_native_and_compat_execveat"),
         ("fs/read_write.c", "ksu_handle_sys_read(fd);", "ksu_handle_sys_read(fd, &buf, &count);", "read_hook_matches_updated_driver_abi"),
         ("fs/devpts/inode.c", "ksu_handle_devpts(d_inode(dentry));", "", "manual_devpts_hook_present"),
-        (KSU + "compat/kernel_compat.h", "return kcalloc(n, size, flags);", "return kzalloc(n * size, flags);", "legacy_allocations_check_overflow"),
+        ("include/linux/mm.h", "check_mul_overflow(n, size, &bytes)", "skip_mul_overflow(n, size, &bytes)", "legacy_allocations_check_overflow"),
+        (KSU + "Makefile", "kernelsu-objs += infra/symbol_resolver.o", "", "resolver_available_in_manual_mode"),
+        ("fs/notify/fdinfo.c", "fanotify_fdinfo(struct seq_file *m, struct fsnotify_mark *mark, struct file *file)", "fanotify_fdinfo(struct seq_file *m, struct fsnotify_mark *mark)", "fdinfo_callbacks_have_consistent_signatures"),
+        (KSU + "hook/setuid_hook.c", "if (work_pending(&susfs_extra_works))", "tw = kzalloc(sizeof(*tw), GFP_ATOMIC);\n    if (work_pending(&susfs_extra_works))", "susfs_work_does_not_leak_on_pending_branch"),
+        (KSU + "runtime/ksud_integration.c", "mutex_lock(&rc_proxy_lock);", "", "init_rc_proxy_claim_and_publication_serialized"),
         ("include/linux/susfs.h", "KSTAT_SPOOF_CTIME_TV_SEC (1 << 8)", "KSTAT_SPOOF_CTIME_TV_SEC (1 < 8)", "susfs_2_3_and_correct_ctime_mask"),
     ]
     regression_count = 0
