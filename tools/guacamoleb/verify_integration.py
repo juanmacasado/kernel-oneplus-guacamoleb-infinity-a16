@@ -2,6 +2,7 @@
 """Read-only source-contract checks; does not run Kbuild or target binaries."""
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -18,7 +19,7 @@ SUSFS_FILES = {
     "include/linux/susfs_def.h", "mm/shmem.c",
 }
 INTEGRATION_FILES = {
-    CONFIG, "drivers/Kconfig", "drivers/Makefile", "fs/devpts/inode.c",
+    "Makefile", CONFIG, "drivers/Kconfig", "drivers/Makefile", "fs/devpts/inode.c",
     "fs/exec.c", "fs/read_write.c",
 }
 
@@ -63,6 +64,12 @@ def validate(read, changed, original_config):
     checks["non_root_product_settings_preserved"] = {
         k: v for k, v in cfg.items() if not k.startswith("CONFIG_KSU")
     } == {k: v for k, v in original.items() if not k.startswith("CONFIG_KSU")}
+    header_rule = 'ifdef CONFIG_KSU\n# KSU includes private SELinux headers from another build directory.\n# Generate them once before parallel compilation, including partial builds.\nPHONY += prepare-ksu-selinux\nprepare: prepare-ksu-selinux\nprepare-ksu-selinux: scripts\n\t$(Q)$(MAKE) $(build)=security/selinux security/selinux/flask.h\nendif\n\n'
+    top_make = read("Makefile")
+    checks["root_kbuild_only_adds_selinux_header_prerequisite"] = (
+        top_make.count(header_rule) == 1
+        and hashlib.sha256(top_make.replace(header_rule, "").encode()).hexdigest() == "3b65a6dbae2324fbafe2ae303bec4917caaf8128d5f0500714f65e5eaa836978"
+    )
     checks["scope_preserves_android16_boot_and_drivers"] = all(
         p.startswith((KSU, "Documentation/guacamoleb/", "tools/guacamoleb/"))
         or p in SUSFS_FILES | INTEGRATION_FILES for p in changed

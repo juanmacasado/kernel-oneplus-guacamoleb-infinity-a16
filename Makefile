@@ -1297,6 +1297,15 @@ prepare0: archprepare gcc-plugins
 # All the preparing..
 prepare: prepare0 prepare-objtool
 
+ifdef CONFIG_KSU
+# KSU includes private SELinux headers from another build directory.
+# Generate them once before parallel compilation, including partial builds.
+PHONY += prepare-ksu-selinux
+prepare: prepare-ksu-selinux
+prepare-ksu-selinux: scripts
+	$(Q)$(MAKE) $(build)=security/selinux security/selinux/flask.h
+endif
+
 # Support for using generic headers in asm-generic
 PHONY += asm-generic uapi-asm-generic
 asm-generic: uapi-asm-generic
