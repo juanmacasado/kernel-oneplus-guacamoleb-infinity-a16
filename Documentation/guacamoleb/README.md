@@ -1,14 +1,15 @@
-# Infinity X Android 16: KernelSU Next legacy + SUSFS
+# Infinity X Android 16: KernelSU Next 3.4.2 legacy + SUSFS
 
 Rama de desarrollo para **OnePlus 7 (`guacamoleb`) con Infinity X 3.12 Vanilla
 Android 16**, preparada el 28 de octubre de 2026.
 
-El código integra KernelSU Next legacy actualizado y SUSFS **2.3.0** sobre la
-rama Android 16 de Harish. **Compilan y enlazan Image, 20 DTB y los cinco
-módulos con Clang 23. Hay un candidato boot empaquetado, sin prueba de arranque.**
-Los insumos del teléfono y el candidato están en [FLASH_CANDIDATE.md](FLASH_CANDIDATE.md).
-El resultado de compilación y los hashes están en
-[BUILD_RESULTS.md](BUILD_RESULTS.md) y [build-result.json](build-result.json).
+El código integra un port de **KernelSU Next 3.4.2 legacy** y SUSFS **2.3.0**
+sobre la rama Android 16 de Harish. Compilan Image, 20 DTB y cinco módulos con
+Clang 23. **Se instaló en boot_a y completó arranque temporal y persistente**,
+con root, SELinux Enforcing y enlace WLAN. El gestor también se actualizó a
+3.4.2. Alcance y límites en [VERSION_3_4_2.md](VERSION_3_4_2.md),
+con [hashes de compilación](build-result342.json) y [lecturas runtime](runtime342.json).
+Los informes anteriores se conservan como historial.
 
 ## Base y procedencia
 
@@ -22,6 +23,9 @@ El resultado de compilación y los hashes están en
   desde la base SUSFS 2.2.0 hasta 2.3.0 y sus correcciones posteriores.
 - Compatibilidad: correcciones seleccionadas de KernelSU Next legacy
   `165b87fa99abfe78058c4dc9df43c432e86b8011`, adaptadas a este árbol.
+- Release 3.4.2: delta oficial revisado hasta
+  `4c706b5938665866ebe16944a481a7b91e3396af`, con los cambios aplicables
+  portados y el backend manual 4.14 conservado.
 
 Las revisiones y los 21 commits completos figuran en
 [source-lock.json](source-lock.json). Las ramas remotas pueden avanzar; el lock
@@ -72,20 +76,24 @@ Cambios específicos para la integración:
 
 ## Gestor y versiones
 
-El driver anuncia código **33315**, UAPI **5** y la etiqueta propia
-`v3.4.0-legacy-a16-susfs2.3`. La etiqueta identifica una integración legacy
-adaptada; no afirma que exista una release oficial v3.4.2 para este kernel.
+El driver responde código **33355**, UAPI **5** y etiqueta propia
+`v3.4.2-legacy-a16-susfs2.3`. Se verificó mediante GET_INFO/GET_VERSION_TAG
+después de reiniciar. Identifica el port legacy descrito en su informe; no
+afirma equivalencia completa con el backend GKI oficial.
 
 Se contrastó con las fuentes públicas del gestor **KernelSU Next v3.4.2**:
 exige al menos 33188 y utiliza UAPI 5. Los campos de las 23 estructuras y
 los números de las 20 órdenes ioctl compartidas del encabezado supercall
-coinciden textualmente. Es una comprobación del contrato de fuentes, no una
-prueba del gestor en ejecución ni una validación completa de ABI compilada.
+coinciden textualmente. El APK instalado figura como v3.4.2/33355, con firma
+criptográfica contrastada contra el certificado anterior. Las lecturas de
+runtime no sustituyen una validación completa de todas las funciones del gestor.
 
 El helper de usuarios `ksu_susfs` debe corresponder a SUSFS 2.3.0/non-GKI.
 El módulo Android que lo distribuye puede tener una numeración diferente;
-su nombre o versión no acredita por sí solo compatibilidad. No se ha
-instalado, ejecutado o actualizado un módulo Android o APK en esta fase.
+su nombre o versión no acredita por sí solo compatibilidad. Se compiló e
+instaló el helper universal desde fuentes fijadas de sidex15; sus consultas
+devuelven v2.3.0 y diez funciones habilitadas, ambas con código 0. No se han
+configurado nuevas reglas automáticas de ocultación.
 
 ## Verificación realizada
 
@@ -95,6 +103,7 @@ Desde la raíz de este repositorio:
 python3 tools/guacamoleb/verify_integration.py --self-test
 python3 tools/guacamoleb/check_c_contracts.py
 python3 tools/guacamoleb/test_susfs_strings.py
+python3 tools/guacamoleb/test_342_forced_features.py
 git diff --no-ext-diff --no-textconv --check 943be052999e4d65f805f8c6a5f22b44ad832683
 ```
 
@@ -112,6 +121,8 @@ No ejecutan Kbuild ni código del kernel. El helper puro de validación de
 cadenas se prueba por separado con 22 casos sintéticos de límites y ASan/UBSan
 en el anfitrión; LeakSanitizer está desactivado por la restricción ptrace del
 sandbox y ese helper no realiza reservas de heap.
+El parser de features forzadas pasa 14 casos con ASan/UBSan; la regresión que
+restaura el avance incorrecto tras NUL debe producir heap-buffer-overflow.
 
 La [revisión completa](REVIEW.md) documenta los errores detectados después de
 la primera publicación y sus correcciones. El [plan de Kbuild](BUILD_CHECK_PLAN.md)
@@ -121,10 +132,11 @@ Kconfig conserva los ajustes solicitados de KSU/SUSFS. La configuración
 resuelta coincide semánticamente con la extraída del boot Android 16 de agosto
 (opciones ausentes tratadas como desactivadas). La compilación completa pasa,
 con cuatro avisos heredados de secciones en el código OPlus de inicialización.
-Los CRC de los cinco módulos generados coinciden con sus exportaciones;
-esto no valida los módulos que lleva instalada la ROM ni el arranque.
+Los CRC de los cinco módulos generados y los 394 del WLAN instalado coinciden
+con las exportaciones. El arranque y el enlace Wi-Fi se comprobaron en el
+teléfono; no se ha medido estabilidad prolongada ni todo el hardware.
 
-## Pendiente antes de una instalación
+## Validación que permanece pendiente
 
 1. Repetir la compilación de publicación con el toolchain Android adecuado.
    El árbol Android 16 común consultado selecciona Clang `r574158`; no se ha
@@ -133,15 +145,16 @@ esto no valida los módulos que lleva instalada la ROM ni el arranque.
    WLAN instalado ya coinciden con el candidato. La base
    conserva un bypass de CRC para `wlan`
    cuando KSU está activo; ese bypass no demuestra que el módulo sea compatible.
-3. Revisar el candidato preparado con el backup exacto de boot_a, sus hashes
-   y la documentación de recuperación. Contrastar también los módulos de
-   usuarios KernelSU/SUSFS antes de la prueba funcional.
-4. Plantear por separado cualquier prueba en hardware. No hay comandos de
-   instalación o flash en este documento.
+3. Comprobar llamadas, cámara, suspensión, consumo y estabilidad prolongada.
+4. Comprobar las funciones de ocultación y los módulos Android concretos
+   que se quieran utilizar. No se infiere su eficacia de la lista de features.
 
 Se ejecutaron las comprobaciones locales y, tras autorización específica,
 Kbuild y sus auxiliares en aislamiento sin red, con fuentes en solo lectura
 y menos de 1 GiB de salida frente al límite de 8 GiB. Posteriormente el usuario
 autorizó lecturas ADB, la copia de boot_a y el empaquetado local. No se ejecutaron
 setup scripts, instalaron dependencias, extrajeron OTA ni montaron imágenes.
-No se reinició, desbloqueó o flasheó el teléfono.
+El usuario pidió después el flasheo y la actualización de ambos componentes:
+se probó primero el arranque temporal y luego se escribió únicamente boot_a,
+con backup y comprobación del hash leído tras reiniciar. Se actualizó el APK
+conservando sus datos y se instaló el helper SUSFS solicitado.

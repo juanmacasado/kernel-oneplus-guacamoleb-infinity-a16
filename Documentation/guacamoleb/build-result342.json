@@ -1,0 +1,190 @@
+{
+  "source_commit": "8bb17398caddb23966f215e55518174687289353",
+  "full_build_seconds": 295.7,
+  "artifacts": [
+    {
+      "path": "vmlinux",
+      "size": 49599872,
+      "sha256": "849ee15524bca6a7433598474b88402d44a3a716f272f3c7621111fd1a80bbc7"
+    },
+    {
+      "path": "arch/arm64/boot/Image",
+      "size": 44523544,
+      "sha256": "74ac40c8cba7fa9a1a86e37375b618a293a4eb907cc60d760883ff92ff4a0151"
+    },
+    {
+      "path": "Module.symvers",
+      "size": 670491,
+      "sha256": "394ef284e4068bf51230a9c1599e2fcc7a32866a3e808e7952a98364d6744755"
+    },
+    {
+      "path": ".config",
+      "size": 163989,
+      "sha256": "a5c7385312641a782edcc9dab59531b47382f9b9dfc4f5904d801dcd75517969"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18821/sm8150-v2.dtb",
+      "size": 454812,
+      "sha256": "1853278bddab9c5b60f23282024baa1a494326cc739f2e5c9bf54adf46dbf4cb"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18821/sm8150.dtb",
+      "size": 452266,
+      "sha256": "d13448d8711b77dacd1f19cbd5bc44e29f002b4b8f4376445120defa8f5b4859"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18821/sm8150p-v2.dtb",
+      "size": 454816,
+      "sha256": "ef694f9795942ae43298fd7882cfb7f387095c9423c2f1c7380b1bafea097417"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18821/sm8150p.dtb",
+      "size": 452270,
+      "sha256": "0d49121785eccbbaa107db5d1332cda58e929a3ec03c0efaef5d6da7d637a314"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18857/sm8150-v2.dtb",
+      "size": 453685,
+      "sha256": "c356ff904bfc36d048edb68feb4bbb3161000ffe826474a089c83d8da68201c0"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18857/sm8150.dtb",
+      "size": 451139,
+      "sha256": "54cade0a52b195a041183efccdc4db610457e8c110223d42599ca6448730d2f1"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18857/sm8150p-v2.dtb",
+      "size": 453689,
+      "sha256": "2e092f3752fb78eea9360d12439dfee374b8eb54cfb074e383a681a908c0862c"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18857/sm8150p.dtb",
+      "size": 451143,
+      "sha256": "240be3b6276ea5550fb969285a099a851d36ba57faf91e9bda585157017c3f9f"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18865/sm8150-v2.dtb",
+      "size": 454040,
+      "sha256": "91fee2869154c9945aad4527082332bd816a69ce0bb4d42733916013f568ac46"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18865/sm8150.dtb",
+      "size": 451494,
+      "sha256": "eba32e3ccca3a30b1dee8d5a3aa9fbbde77da3a24f04e9e13ef6b99fbf14c2d2"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18865/sm8150p-v2.dtb",
+      "size": 454044,
+      "sha256": "b240c0f74c82ac4e03f0e6fb0074d59795d2c6a74f8cd5550935fb425eaf19c9"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18865/sm8150p.dtb",
+      "size": 451498,
+      "sha256": "a31c7de73eee4c2fed4f1ae7346e85149742be9ce9e793bbb201e0b8969470ae"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19801/sm8150-v2.dtb",
+      "size": 454040,
+      "sha256": "4c733c333e01d70133e1d1179426a2f5368a076699fe29b828adfff47784ea4d"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19801/sm8150.dtb",
+      "size": 451494,
+      "sha256": "526a8120d4075678b9cfefdd6ebbad28b219e58a6fb4c6dc8cad6da63b662256"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19801/sm8150p-v2.dtb",
+      "size": 454044,
+      "sha256": "7929f98cc8f72184d0ea3c1bc9f15c2f94894edbc3f0bc40bea117cc952fcb71"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19801/sm8150p.dtb",
+      "size": 451498,
+      "sha256": "fbdba0a030971e84698a26d1fb432c7e568c96991a9d291b6e1cb1d6739a784e"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19863/sm8150-v2.dtb",
+      "size": 454040,
+      "sha256": "570627276d93142b718b2286bb401c5f1d12a77e772ecfa854b0e83b08c338ff"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19863/sm8150.dtb",
+      "size": 451494,
+      "sha256": "5a11e2e188921191ebd368e8ed7b42a09e368d60a1d322985b0363d4592e69a4"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19863/sm8150p-v2.dtb",
+      "size": 454044,
+      "sha256": "c1c93e85827b5975436c5989f73283a8675412dcac951e8852afa9c66c41b89a"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19863/sm8150p.dtb",
+      "size": 451498,
+      "sha256": "e4ddd3e94902348c8dbc2db7dd9ddb19c8f84d4cec351d52f0eedc9c25276675"
+    },
+    {
+      "path": "drivers/media/usb/gspca/gspca_main.ko",
+      "size": 60712,
+      "sha256": "b0fd31c941e77672f6839a5935a254b581d309793979b197b343a26a0bce4bf5"
+    },
+    {
+      "path": "drivers/staging/qcacld-3.0/wlan.ko",
+      "size": 11705736,
+      "sha256": "502db42fc55fa3ac690f58b7d99bcc80f94d3d80705c6af42eed805b64924823"
+    },
+    {
+      "path": "net/ipv4/tcp_bic.ko",
+      "size": 10792,
+      "sha256": "fb7ac8f2e1e944be8accd4a670b6b7a13ff534e8cee3f6fb14c886e4c9a11622"
+    },
+    {
+      "path": "net/ipv4/tcp_htcp.ko",
+      "size": 9720,
+      "sha256": "74165a5e9265c422e01d86a80f2ade6bf22d6c3538253ac94d3aa73df33f5628"
+    },
+    {
+      "path": "net/ipv4/tcp_westwood.ko",
+      "size": 7024,
+      "sha256": "7ea97b2de1a17da36846229a40ade824bd9862026b35bb1f4515d5b18b46dcfe"
+    }
+  ],
+  "module_crc_checks": {
+    "drivers/media/usb/gspca/gspca_main.ko": {
+      "versioned_symbols": 65,
+      "crc_mismatches": []
+    },
+    "drivers/staging/qcacld-3.0/wlan.ko": {
+      "versioned_symbols": 394,
+      "crc_mismatches": []
+    },
+    "net/ipv4/tcp_bic.ko": {
+      "versioned_symbols": 8,
+      "crc_mismatches": []
+    },
+    "net/ipv4/tcp_htcp.ko": {
+      "versioned_symbols": 8,
+      "crc_mismatches": []
+    },
+    "net/ipv4/tcp_westwood.ko": {
+      "versioned_symbols": 9,
+      "crc_mismatches": []
+    },
+    "installed-ROM-WLAN": {
+      "versioned_symbols": 394,
+      "crc_mismatches": []
+    }
+  },
+  "required_symbols": {
+    "kernelsu_init": true,
+    "ksu_handle_execveat": true,
+    "ksu_handle_sys_read": true,
+    "ksu_module_blacklist_init": true,
+    "susfs_show_version": true,
+    "susfs_get_enabled_features": true
+  },
+  "strong_undefined_symbols": [],
+  "kernel_release": "4.14.357-perf-g8bb17398cadd",
+  "dtb_count": 20,
+  "module_count": 5,
+  "config_changes": {}
+}

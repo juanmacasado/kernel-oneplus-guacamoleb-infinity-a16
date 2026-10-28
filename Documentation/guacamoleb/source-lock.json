@@ -135,27 +135,38 @@
   },
   "validation": {
     "compiled": true,
-    "device_tested": false,
+    "device_tested": true,
     "boot_image_produced": true,
     "static_checker": "tools/guacamoleb/verify_integration.py --self-test",
-    "compiled_source_commit": "30a151d718fb5b91ad20f44c5a1f16fade51de26",
+    "compiled_source_commit": "8bb17398caddb23966f215e55518174687289353",
     "compiler": "Clang 23.1.4 (diagnostic; not Android r574158)",
     "full_targets": [
       "Image",
       "dtbs",
       "modules"
     ],
-    "build_result": "Documentation/guacamoleb/build-result.json",
+    "build_result": "Documentation/guacamoleb/build-result342.json",
     "installed_rom_modules_validated": false,
     "section_mismatch_warnings": 4,
-    "boot_candidate_sha256": "edaabd74693d0cf215e64c21817d1aa9662236eb3c05921569140c6fbccda6af",
-    "boot_candidate_report": "Documentation/guacamoleb/FLASH_CANDIDATE.md",
-    "boot_tested": false,
+    "boot_candidate_sha256": "0af449c667ad7d09679f4c3c306785bfd47eed0cb5a9bccf174f1045811e22d7",
+    "boot_candidate_report": "Documentation/guacamoleb/VERSION_3_4_2.md",
+    "boot_tested": true,
     "device_readonly_inspected": true,
     "installed_wlan_crc_validated": true,
     "installed_wlan_versioned_symbols": 394,
-    "new_v342_port_compiled": false,
-    "new_v342_port_device_tested": false
+    "new_v342_port_compiled": true,
+    "new_v342_port_device_tested": true,
+    "runtime_result": "Documentation/guacamoleb/runtime342.json",
+    "device_test_scope": [
+      "temporary and persistent boot",
+      "root UID 0",
+      "SELinux Enforcing",
+      "WLAN carrier",
+      "driver info ioctl",
+      "SUSFS version/features",
+      "boot_a SHA256 readback"
+    ],
+    "long_term_stability_tested": false
   },
   "review": {
     "reviewed_start_commit": "54d672f23da147c472ba31b7ba2cfb9cc965626c",
@@ -167,12 +178,14 @@
     "manager_certificate_size": 998,
     "manager_certificate_sha256": "79e590113c4c4c0c222978e413a5faa801666957b1212a328e46c00c69821bf7",
     "manager_digest_and_certificate_match": true,
-    "apk_signature_cryptography_verified": false,
+    "apk_signature_cryptography_verified": true,
     "bounded_string_cases": 22,
     "bounded_string_sanitizers": [
       "address",
       "undefined"
-    ]
+    ],
+    "forced_feature_parser_cases": 14,
+    "forced_feature_old_loop_rejected_by_asan": true
   },
   "driver_release_port": {
     "official_release": "v3.4.2",
@@ -185,6 +198,7 @@
       "post-fs-data forced-feature retry",
       "RCU-protected policy reads under policy mutex",
       "fixed legacy force_feature parser end-of-input overread"
-    ]
+    ],
+    "integration_commit": "8bb17398caddb23966f215e55518174687289353"
   }
 }

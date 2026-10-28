@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-28",
+  "compiled_source_commit": "8bb17398caddb23966f215e55518174687289353",
+  "manager_version": "v3.4.2",
+  "manager_version_code": 33355,
+  "driver": {
+    "driver_version": 33355,
+    "driver_tag": "v3.4.2-legacy-a16-susfs2.3",
+    "uapi": 5,
+    "flags": 0
+  },
+  "kernel_release": "4.14.357-perf-g8bb17398cadd",
+  "boot_partition": "boot_a",
+  "boot_completed": true,
+  "root_uid": 0,
+  "selinux": "Enforcing",
+  "wlan_link_active": true,
+  "susfs_version": "v2.3.0",
+  "susfs_enabled_features": [
+    "CONFIG_KSU_SUSFS_SUS_PATH",
+    "CONFIG_KSU_SUSFS_SUS_MOUNT",
+    "CONFIG_KSU_SUSFS_SUS_KSTAT",
+    "CONFIG_KSU_SUSFS_TRY_UMOUNT",
+    "CONFIG_KSU_SUSFS_SPOOF_UNAME",
+    "CONFIG_KSU_SUSFS_ENABLE_LOG",
+    "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS",
+    "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG",
+    "CONFIG_KSU_SUSFS_OPEN_REDIRECT",
+    "CONFIG_KSU_SUSFS_SUS_MAP"
+  ],
+  "boot_sha256": "0af449c667ad7d09679f4c3c306785bfd47eed0cb5a9bccf174f1045811e22d7",
+  "boot_readback_matches": true,
+  "backup_before_v342_sha256": "edaabd74693d0cf215e64c21817d1aa9662236eb3c05921569140c6fbccda6af",
+  "temporary_boot_passed": true,
+  "persistent_boot_passed": true,
+  "boot_b_written": false,
+  "kernel_backend": "legacy 4.14 manual hooks; inline SUSFS; not unmodified official GKI backend",
+  "long_term_stability_tested": false
+}

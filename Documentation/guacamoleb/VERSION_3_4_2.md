@@ -51,9 +51,32 @@ copia local del APK anterior. No se desinstaló la aplicación ni borraron datos
 
 ## Estado de validación
 
-Preparación del port: pasan los contratos estáticos existentes, ocho sondas C,
-22 casos de strings y las 14 pruebas nuevas del parser. La compilación y
-prueba de arranque de esta nueva revisión deben quedar registradas por su
-commit exacto antes de considerarla instalada. Los informes anteriores
-describen el kernel probado `30a151d718fb`, que sigue siendo el baseline de
-recuperación mientras se valida este port.
+Compilado y probado el commit **8bb17398caddb23966f215e55518174687289353**:
+
+- Image, 20 DTB y cinco módulos: build completo con código 0 en 295,7 segundos.
+- Configuración semánticamente idéntica al kernel anterior; CRC de los cinco
+  módulos generados y los 394 del WLAN instalado coincidentes.
+- Cuatro avisos heredados de secciones en update_manifest y
+  update_telephony_manifest; fuente OPlus sin cambios. Un aviso del compilador
+  anfitrión en modpost sobre const, sin error de compilación.
+- 24 contratos estáticos, 18 regresiones negativas, ocho sondas C, 22 casos de
+  strings y 14 del parser, con rechazo ASan del bucle antiguo.
+- Arranque temporal y persistente correctos, UID 0, SELinux Enforcing,
+  wlan0 up/carrier=1 y SUSFS v2.3.0 con diez features.
+- Driver leído por ioctl: **33355, v3.4.2-legacy-a16-susfs2.3, UAPI 5**.
+- Gestor instalado: **v3.4.2 / 33355**.
+- Boot_a leído tras reiniciar: SHA-256
+  `0af449c667ad7d09679f4c3c306785bfd47eed0cb5a9bccf174f1045811e22d7`,
+  coincidente exactamente con el nuevo boot. Se conservan ramdisk y DTB
+  anteriores byte a byte. No se escribió boot_b.
+
+El backup previo a esta actualización tiene SHA-256
+`edaabd74693d0cf215e64c21817d1aa9662236eb3c05921569140c6fbccda6af`
+y corresponde al kernel probado `30a151d718fb`. Quedan fuera la estabilidad
+prolongada, todo el hardware y la eficacia de ocultación. Se sigue usando
+Clang 23 de diagnóstico, no el Clang Android original.
+
+El diagnóstico propio [ksu_get_info.c](../../tools/guacamoleb/ksu_get_info.c)
+solo lee GET_INFO/GET_VERSION_TAG y se retiró del temporal después de usarlo.
+Se compiló con el NDK r27d, API 29 y alineación TLS ARM64 de 64 bytes;
+el primer intento de API 24 fue rechazado por Bionic antes de entrar a main.
