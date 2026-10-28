@@ -182,10 +182,10 @@ endif
 ifneq ($(shell grep -q "atomic_t filter_count;" $(srctree)/include/linux/seccomp.h; echo $$?),0)
 $(error KernelSU requires the tracked seccomp filter_count backport)
 endif
-ifneq ($(shell grep -q "selinux_inode(" $(srctree)/security/selinux/include/objsec.h; echo $$?),0)
+ifneq ($(shell grep -wq "selinux_inode" $(srctree)/security/selinux/include/objsec.h; echo $$?),0)
 $(error KernelSU requires the tracked selinux_inode helper)
 endif
-ifneq ($(shell grep -q "selinux_cred(" $(srctree)/security/selinux/include/objsec.h; echo $$?),0)
+ifneq ($(shell grep -wq "selinux_cred" $(srctree)/security/selinux/include/objsec.h; echo $$?),0)
 $(error KernelSU requires the tracked selinux_cred helper)
 endif
 
