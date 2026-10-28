@@ -1,8 +1,10 @@
-# Comprobación local de Kbuild propuesta
+# Comprobación local de Kbuild autorizada
 
-La revisión de fuentes está preparada en esta rama. Ejecutar Kbuild requiere
-autorización específica según el AGENTS.md del workspace. Este documento no
-ejecuta comandos y no autoriza acceso a un teléfono.
+El usuario autorizó el 28 de octubre de 2026 esta comprobación aislada,
+respondiendo: «Sí, autoriza esa comprobación aislada». Esa autorización cumple
+el requisito de AGENTS.md para ejecutar Kbuild y sus auxiliares dentro de este
+alcance. Los resultados están en [BUILD_RESULTS.md](BUILD_RESULTS.md).
+Este documento no autoriza acceso a un teléfono ni empaquetado de boot.
 
 ## Alcance concreto
 
@@ -10,7 +12,7 @@ ejecuta comandos y no autoriza acceso a un teléfono.
   `vendor/sm8150-perf_defconfig` y `vendor/oplus.config`, y ejecutar `olddefconfig`.
 - Comprobar que Kconfig conserva KSU integrado, manual hooks, SUSFS y la
   política de módulos prevista; registrar cualquier opción descartada.
-- Compilar primero `drivers/kernelsu/kernelsu.o` y los archivos de fs/mm
+- Compilar primero el objetivo de directorio `drivers/kernelsu/` y los archivos de fs/mm
   modificados. Si esa fase pasa, intentar `Image`, `dtbs` y módulos, incluido
   WLAN, y comprobar los símbolos enlazados.
 - Usar las herramientas ya instaladas: Clang 23.1.4, LLD y utilidades LLVM,
@@ -29,7 +31,7 @@ Bubblewrap se comprobó ejecutando únicamente `/usr/bin/true` con
 sandbox restringido falló por NETLINK_ROUTE; el intento fuera de esa restricción
 confirmó que el aislamiento funciona sin sudo.
 
-La ejecución propuesta usará ese aislamiento sin red, el sistema y las fuentes
+La ejecución autorizada usa ese aislamiento sin red, el sistema y las fuentes
 en solo lectura, un `/tmp` privado y un directorio nuevo de salida dentro del
 workspace como único directorio persistente escribible. No se reutilizará ni
 borrará una salida ajena. Se limitarán los trabajos a cuatro y se interrumpirá

@@ -4,8 +4,10 @@ Rama de desarrollo para **OnePlus 7 (`guacamoleb`) con Infinity X 3.12 Vanilla
 Android 16**, preparada el 28 de octubre de 2026.
 
 El código integra KernelSU Next legacy actualizado y SUSFS **2.3.0** sobre la
-rama Android 16 de Harish. **No está compilado ni probado en hardware. No hay
-un boot.img nuevo listo para instalar.**
+rama Android 16 de Harish. **Compilan y enlazan Image, 20 DTB y los cinco
+módulos con Clang 23. No está probado en hardware ni hay un boot.img nuevo
+listo para instalar.** El resultado y los hashes están en
+[BUILD_RESULTS.md](BUILD_RESULTS.md) y [build-result.json](build-result.json).
 
 ## Base y procedencia
 
@@ -60,6 +62,9 @@ Cambios específicos para la integración:
   por acceso directo a un array basándose solo en el número de versión.
 - El Makefile de KSU comprueba los backports que ya están versionados y falla
   si faltan. Se eliminan sus escrituras automáticas mediante `sed -i`.
+- Kbuild genera los headers privados de SELinux antes de la compilación
+  paralela o parcial de KSU. Se corrige también el parseo de sus comprobaciones
+  de helpers, que impedía iniciar la compilación.
 - Se mantiene la integración manual de init.rc. El nuevo preinit runner y su
   helper de compilación se omiten de esta variante; no deben activarse por
   la mera presencia de headers generados en un directorio de salida.
@@ -92,7 +97,7 @@ python3 tools/guacamoleb/test_susfs_strings.py
 git diff --no-ext-diff --no-textconv --check 943be052999e4d65f805f8c6a5f22b44ad832683
 ```
 
-Pasan **23 comprobaciones estáticas y 18 regresiones negativas**. Comprueban
+Pasan **24 comprobaciones estáticas y 18 regresiones negativas**. Comprueban
 la inclusión del driver, selección de hooks, firmas de las interfaces,
 fuentes de objetos, backports, layout SELinux y preservación del alcance.
 Las regresiones introducen en memoria errores como desactivar KSU, cambiar la
@@ -109,19 +114,22 @@ sandbox y ese helper no realiza reservas de heap.
 
 La [revisión completa](REVIEW.md) documenta los errores detectados después de
 la primera publicación y sus correcciones. El [plan de Kbuild](BUILD_CHECK_PLAN.md)
-delimita la comprobación de compilación propuesta.
+delimita la comprobación aislada autorizada y realizada.
 
-Estas comprobaciones no sustituyen Kconfig, compilación, enlace, validación de
-ABI de módulos, arranque o pruebas funcionales. El estado estático aprobado
-se refiere al código y a los invariantes descritos.
+Kconfig conserva los ajustes solicitados de KSU/SUSFS. La configuración
+resuelta coincide semánticamente con la extraída del boot Android 16 de agosto
+(opciones ausentes tratadas como desactivadas). La compilación completa pasa,
+con cuatro avisos heredados de secciones en el código OPlus de inicialización.
+Los CRC de los cinco módulos generados coinciden con sus exportaciones;
+esto no valida los módulos que lleva instalada la ROM ni el arranque.
 
 ## Pendiente antes de producir una imagen
 
-1. Autorizar y realizar la compilación con un toolchain fijado y revisado.
+1. Repetir la compilación de publicación con el toolchain Android adecuado.
    El árbol Android 16 común consultado selecciona Clang `r574158`; no se ha
    descargado ni ejecutado ese toolchain durante esta integración.
-2. Validar la configuración final, los avisos del compilador y el enlace del
-   driver y del módulo WLAN. La base conserva un bypass de CRC para `wlan`
+2. Contrastar los módulos de la ROM concreta con el candidato. La base
+   conserva un bypass de CRC para `wlan`
    cuando KSU está activo; ese bypass no demuestra que el módulo sea compatible.
 3. Obtener y contrastar los módulos y el boot original de la ROM exacta.
    Preparar un candidato con su ramdisk Android 16 y componentes coherentes,
@@ -129,7 +137,8 @@ se refiere al código y a los invariantes descritos.
 4. Plantear por separado cualquier prueba en hardware. No hay comandos de
    instalación o flash en este documento.
 
-En este trabajo solo se descargaron fuentes como datos, se aplicaron cambios
-de código y se ejecutaron las comprobaciones locales propias. No se ejecutaron
-setup scripts, Makefile de terceros o binarios Android; no se instalaron
-dependencias, extrajeron OTA, montaron imágenes ni accedió al teléfono.
+Se ejecutaron las comprobaciones locales y, tras autorización específica,
+Kbuild y sus auxiliares en aislamiento sin red, con fuentes en solo lectura
+y menos de 1 GiB de salida frente al límite de 8 GiB. No se ejecutaron setup
+scripts o binarios Android; no se instalaron dependencias, extrajeron OTA,
+montaron imágenes ni accedió al teléfono.

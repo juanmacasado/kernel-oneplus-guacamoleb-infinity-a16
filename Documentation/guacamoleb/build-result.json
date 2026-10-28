@@ -1,0 +1,262 @@
+{
+  "source_commit": "30a151d718fb5b91ad20f44c5a1f16fade51de26",
+  "artifacts": [
+    {
+      "path": "vmlinux",
+      "size": 49599312,
+      "sha256": "b32eebb575631d4ca8495fc67523ade090f046d96bf60559d4556b8259672a31"
+    },
+    {
+      "path": "arch/arm64/boot/Image",
+      "size": 44523544,
+      "sha256": "3b332b8bdf0a78ae11cc9121e074ca31da4fb0c4caf753f63e4131244e8ffb65"
+    },
+    {
+      "path": "Module.symvers",
+      "size": 670491,
+      "sha256": "394ef284e4068bf51230a9c1599e2fcc7a32866a3e808e7952a98364d6744755"
+    },
+    {
+      "path": ".config",
+      "size": 163989,
+      "sha256": "a5c7385312641a782edcc9dab59531b47382f9b9dfc4f5904d801dcd75517969"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18821/sm8150-v2.dtb",
+      "size": 454812,
+      "sha256": "1853278bddab9c5b60f23282024baa1a494326cc739f2e5c9bf54adf46dbf4cb"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18821/sm8150.dtb",
+      "size": 452266,
+      "sha256": "d13448d8711b77dacd1f19cbd5bc44e29f002b4b8f4376445120defa8f5b4859"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18821/sm8150p-v2.dtb",
+      "size": 454816,
+      "sha256": "ef694f9795942ae43298fd7882cfb7f387095c9423c2f1c7380b1bafea097417"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18821/sm8150p.dtb",
+      "size": 452270,
+      "sha256": "0d49121785eccbbaa107db5d1332cda58e929a3ec03c0efaef5d6da7d637a314"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18857/sm8150-v2.dtb",
+      "size": 453685,
+      "sha256": "c356ff904bfc36d048edb68feb4bbb3161000ffe826474a089c83d8da68201c0"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18857/sm8150.dtb",
+      "size": 451139,
+      "sha256": "54cade0a52b195a041183efccdc4db610457e8c110223d42599ca6448730d2f1"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18857/sm8150p-v2.dtb",
+      "size": 453689,
+      "sha256": "2e092f3752fb78eea9360d12439dfee374b8eb54cfb074e383a681a908c0862c"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18857/sm8150p.dtb",
+      "size": 451143,
+      "sha256": "240be3b6276ea5550fb969285a099a851d36ba57faf91e9bda585157017c3f9f"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18865/sm8150-v2.dtb",
+      "size": 454040,
+      "sha256": "91fee2869154c9945aad4527082332bd816a69ce0bb4d42733916013f568ac46"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18865/sm8150.dtb",
+      "size": 451494,
+      "sha256": "eba32e3ccca3a30b1dee8d5a3aa9fbbde77da3a24f04e9e13ef6b99fbf14c2d2"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18865/sm8150p-v2.dtb",
+      "size": 454044,
+      "sha256": "b240c0f74c82ac4e03f0e6fb0074d59795d2c6a74f8cd5550935fb425eaf19c9"
+    },
+    {
+      "path": "arch/arm64/boot/dts/18865/sm8150p.dtb",
+      "size": 451498,
+      "sha256": "a31c7de73eee4c2fed4f1ae7346e85149742be9ce9e793bbb201e0b8969470ae"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19801/sm8150-v2.dtb",
+      "size": 454040,
+      "sha256": "4c733c333e01d70133e1d1179426a2f5368a076699fe29b828adfff47784ea4d"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19801/sm8150.dtb",
+      "size": 451494,
+      "sha256": "526a8120d4075678b9cfefdd6ebbad28b219e58a6fb4c6dc8cad6da63b662256"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19801/sm8150p-v2.dtb",
+      "size": 454044,
+      "sha256": "7929f98cc8f72184d0ea3c1bc9f15c2f94894edbc3f0bc40bea117cc952fcb71"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19801/sm8150p.dtb",
+      "size": 451498,
+      "sha256": "fbdba0a030971e84698a26d1fb432c7e568c96991a9d291b6e1cb1d6739a784e"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19863/sm8150-v2.dtb",
+      "size": 454040,
+      "sha256": "570627276d93142b718b2286bb401c5f1d12a77e772ecfa854b0e83b08c338ff"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19863/sm8150.dtb",
+      "size": 451494,
+      "sha256": "5a11e2e188921191ebd368e8ed7b42a09e368d60a1d322985b0363d4592e69a4"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19863/sm8150p-v2.dtb",
+      "size": 454044,
+      "sha256": "c1c93e85827b5975436c5989f73283a8675412dcac951e8852afa9c66c41b89a"
+    },
+    {
+      "path": "arch/arm64/boot/dts/19863/sm8150p.dtb",
+      "size": 451498,
+      "sha256": "e4ddd3e94902348c8dbc2db7dd9ddb19c8f84d4cec351d52f0eedc9c25276675"
+    },
+    {
+      "path": "drivers/media/usb/gspca/gspca_main.ko",
+      "size": 60712,
+      "sha256": "79ae8d481833f0d47b9388dcf72e70c6df76dc3f163c6021c7b1d254fb18e288"
+    },
+    {
+      "path": "drivers/staging/qcacld-3.0/wlan.ko",
+      "size": 11705736,
+      "sha256": "c4b80b10d3acacd6f2d05ae9f79a47938b3e5e39773115226358d0f176025992"
+    },
+    {
+      "path": "net/ipv4/tcp_bic.ko",
+      "size": 10792,
+      "sha256": "42a156017dc04865412f79c46a306eeabeca03bcafff3135bee55472592b4f67"
+    },
+    {
+      "path": "net/ipv4/tcp_htcp.ko",
+      "size": 9720,
+      "sha256": "ab1c13057ca63d550a99d40a3147ee294b14296c389b3f5f2950315a611d5703"
+    },
+    {
+      "path": "net/ipv4/tcp_westwood.ko",
+      "size": 7024,
+      "sha256": "d250f26fc82c6050da425d6e630c05267da866759e5ffeebbfddd6a7fb447738"
+    }
+  ],
+  "required_linked_symbols": {
+    "kernelsu_init": true,
+    "ksu_handle_execveat": true,
+    "ksu_handle_devpts": true,
+    "ksu_lookup_kernel_symbols": true,
+    "find_kernel_symbol_exact": true,
+    "ksu_handle_sys_read": true,
+    "susfs_add_sus_path": true,
+    "susfs_set_hide_sus_mnts_for_non_su_procs": true
+  },
+  "undefined_vmlinux_symbols": [
+    "                 w _binary__btf_vmlinux_bin_end",
+    "                 w _binary__btf_vmlinux_bin_start"
+  ],
+  "kernel_release": "4.14.357-perf-g30a151d718fb",
+  "wlan_modinfo": "\nString dump of section '.modinfo':\n[     0] license=Dual BSD/GPL\n[    15] author=Qualcomm Atheros, Inc.\n[    33] description=WLAN HOST DEVICE DRIVER\n[    57] parmtype=enable_dfs_chan_scan:int\n[    79] parmtype=enable_11d:int\n[    91] parmtype=country_code:charp\n[    ad] parmtype=prealloc_disabled:byte\n[    cd] parmtype=qdf_log_dump_at_kernel_enable:bool\n[    f9] parmtype=qdf_log_flush_timer_period:uint\n[   122] vermagic=4.14.357-perf-g30a151d718fb SMP preempt mod_unload modversions aarch64\n[   172] name=wlan\n[   17c] intree=Y\n[   185] staging=Y\n[   18f] depends=\n",
+  "wlan_strong_import_count": 393,
+  "wlan_imports_without_export": [],
+  "output_bytes": 880246769,
+  "dtb_count": 20,
+  "module_count": 5,
+  "image_arm64_magic_valid": true,
+  "dtb_headers_valid": true,
+  "toolchain": {
+    "clang": "clang version 23.1.4",
+    "lld": "LLD 23.1.4 (compatible with GNU linkers)",
+    "gcc_host": "gcc (GCC) 16.2.1 20260810"
+  },
+  "module_crc_checks": {
+    "drivers/media/usb/gspca/gspca_main.ko": {
+      "versioned_symbols": 65,
+      "crc_mismatches": []
+    },
+    "drivers/staging/qcacld-3.0/wlan.ko": {
+      "versioned_symbols": 394,
+      "crc_mismatches": []
+    },
+    "net/ipv4/tcp_bic.ko": {
+      "versioned_symbols": 8,
+      "crc_mismatches": []
+    },
+    "net/ipv4/tcp_htcp.ko": {
+      "versioned_symbols": 8,
+      "crc_mismatches": []
+    },
+    "net/ipv4/tcp_westwood.ko": {
+      "versioned_symbols": 9,
+      "crc_mismatches": []
+    }
+  },
+  "section_warnings": {
+    "count": 4,
+    "functions": [
+      "update_manifest",
+      "update_telephony_manifest"
+    ],
+    "reference": "__initdata boot_command_line",
+    "source_file": "drivers/soc/oplus/system/oplus_project/qcom/oplus_project.c",
+    "source_identical_to_android16_base": true,
+    "source_sha256": "c2d946a2e5e41695fe36ec7685dfca9106971cfc41c07cf67dee045815a60c0b",
+    "call_path": "oplus_project_init (__init), arch_initcall; only live call site for both functions",
+    "disposition": "Inherited annotation mismatch; no post-init call found in this source. Runtime not tested."
+  },
+  "undefined_vmlinux_strong_symbols": [],
+  "date": "2026-10-28",
+  "full_build_returncode": 0,
+  "full_build_seconds": 301.0,
+  "targets": [
+    "Image",
+    "dtbs",
+    "modules"
+  ],
+  "jobs": 4,
+  "isolation": {
+    "network": false,
+    "sources_read_only": true,
+    "output_limit_bytes": 8589934592
+  },
+  "configuration": {
+    "fragments": [
+      "vendor/sm8150-perf_defconfig",
+      "vendor/oplus.config"
+    ],
+    "resolved_by": "olddefconfig",
+    "initial_resolution_source_commit": "0dcf4b1858c10547b20097306232c5d258bd07d6",
+    "built_source_commit": "30a151d718fb5b91ad20f44c5a1f16fade51de26",
+    "kconfig_sources_unchanged_between_commits": true,
+    "matches_august_semantically": true,
+    "august_symbol_count": 5020,
+    "built_symbol_count": 5021,
+    "absent_symbols_treated_as": "n"
+  },
+  "device_tested": false,
+  "boot_image_produced": false,
+  "original_android_toolchain_reproduced": false,
+  "installed_rom_modules_validated": false,
+  "local_validation": {
+    "source_checks": 24,
+    "negative_regressions": 18,
+    "c_syntax_probes": 8,
+    "string_boundary_cases": 22
+  },
+  "log_sha256": {
+    "full_kernel-30a151d718fb.log": "0215b9adbaa3c48a6c576e2487fb10b5b3c673eac337ce1f107cdcc2787170ea",
+    "section_diagnostics-30a151d718fb.log": "ad3ea65cd36f106debfd0a9da6ace1ac433e95974397edbf374efd43c7020052"
+  },
+  "embedded_image_checks": {
+    "embedded_config_exactly_matches_output": true,
+    "embedded_config_sha256": "a5c7385312641a782edcc9dab59531b47382f9b9dfc4f5904d801dcd75517969",
+    "driver_tag_in_image": true,
+    "susfs_version_in_image": true
+  }
+}

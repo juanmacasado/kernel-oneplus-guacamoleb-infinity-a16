@@ -134,14 +134,24 @@
     "manager_header_url": "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/4c706b5938665866ebe16944a481a7b91e3396af/uapi/supercall.h"
   },
   "validation": {
-    "compiled": false,
+    "compiled": true,
     "device_tested": false,
     "boot_image_produced": false,
-    "static_checker": "tools/guacamoleb/verify_integration.py --self-test"
+    "static_checker": "tools/guacamoleb/verify_integration.py --self-test",
+    "compiled_source_commit": "30a151d718fb5b91ad20f44c5a1f16fade51de26",
+    "compiler": "Clang 23.1.4 (diagnostic; not Android r574158)",
+    "full_targets": [
+      "Image",
+      "dtbs",
+      "modules"
+    ],
+    "build_result": "Documentation/guacamoleb/build-result.json",
+    "installed_rom_modules_validated": false,
+    "section_mismatch_warnings": 4
   },
   "review": {
     "reviewed_start_commit": "54d672f23da147c472ba31b7ba2cfb9cc965626c",
-    "static_checks": 23,
+    "static_checks": 24,
     "negative_regressions": 18,
     "syntax_only_c_probes": 8,
     "native_kvcalloc_backport_used": true,

@@ -6,7 +6,8 @@
 La primera validación comprobaba invariantes textuales; no era una
 comprobación completa de compilación o enlace. Esta revisión encontró dos
 errores en la integración publicada y cinco problemas adicionales en el código
-heredado. Se han corregido en fuentes; la compilación sigue pendiente.
+heredado. La compilación autorizada detectó además dos defectos de Kbuild,
+también corregidos. El kernel completo y WLAN compilan y enlazan.
 
 ## Correcciones
 
@@ -17,9 +18,10 @@ heredado. Se han corregido en fuentes; la compilación sigue pendiente.
 | Fuga al encontrar trabajo SUSFS pendiente | `ksu_handle_extra_susfs_work()` reservaba `tw` antes de retornar por `work_pending()`, sin liberar la reserva. | Reservar después de esa salida temprana; conservar la liberación cuando falla `task_work_add()`. |
 | Firma de callback fanotify incoherente | Con SUS_MOUNT o SUS_KSTAT activos, `show_fdinfo()` esperaba tres argumentos; fanotify conservaba dos. La configuración antigua tiene FANOTIFY desactivado, pero la combinación era inválida. | Usar una firma interna uniforme de tres argumentos para inotify/fanotify y para el despachador, independientemente de las opciones SUSFS. |
 | Claim y publicación de init.rc sin exclusión | READ_ONCE/WRITE_ONCE sobre `rc_hooked` no impedían que dos lectores reclamaran simultáneamente el proxy y escribieran sus operaciones globales. | Proteger con mutex la comprobación, inicialización y publicación. Detener el hook repetido fuera del mutex. |
-
 | Cadenas de usuarios sin terminación comprobada | Las órdenes de rutas y uname copiaban arrays completos y después los pasaban a funciones de strings, sin exigir un NUL dentro del campo. | Validar 12 campos en 10 entradas de SUSFS y devolver ENAMETOOLONG antes de utilizarlos si falta el terminador. |
 | Reserva concurrente del cmdline compartido | Dos escritores podían superar el test del puntero y reservar buffers distintos, perdiendo una reserva. | Usar un único array estático, con la publicación y copia protegidas por el seqlock existente. |
+| Parseo inválido del Makefile de KSU | Los paréntesis literales de dos patrones grep desequilibraban `$(shell ...)` y make fallaba antes de compilar. | Buscar el identificador con `grep -wq` sin el paréntesis. |
+| Headers SELinux sin prerrequisito | La compilación parcial o paralela de KSU podía incluir `flask.h` antes de su generación en otro directorio. | Añadir a `prepare` un prerrequisito condicionado a KSU que usa la regla existente de SELinux. El resto del Makefile principal conserva el hash de la base. |
 
 Se mantuvieron el DTS, el montaje de vendor, la política de firmas y los
 ajustes de producto ajenos a KSU de la base Android 16. No se sustituyó la
@@ -27,7 +29,7 @@ imagen de arranque por una de Android 17.
 
 ## Validación ampliada
 
-- 23 contratos de fuentes y 18 regresiones negativas. Ahora se incluye la
+- 24 contratos de fuentes y 18 regresiones negativas. Ahora se incluye la
   selección del resolver en modo manual, la firma fanotify, el orden de la
   reserva en SUSFS y el mutex de init.rc. El control de alcance también
   considera archivos nuevos no versionados, antes omitidos.
@@ -50,15 +52,19 @@ imagen de arranque por una de Android 17.
   coincidente con la identidad esperada por el driver. Se extrajeron datos;
   no se ejecutó el APK ni se verificó criptográficamente su firma completa.
 - `git diff --check` y comprobación de alcance contra la base Android 16.
+- Kconfig, compilación de objetos afectados y compilación completa de Image,
+  20 DTB y cinco módulos con Clang/LLD 23.1.4, sin errores. Los 394 CRC
+  versionados de WLAN (incluido module_layout) y los de los otros cuatro
+  módulos coinciden con Module.symvers. Detalles, avisos heredados, hashes y
+  límites en [BUILD_RESULTS.md](BUILD_RESULTS.md).
 
 ## Límites que permanecen
 
-No se ha ejecutado Kconfig o Kbuild. Las sondas no compilan el kernel ni
-resuelven todos sus símbolos. No hay validación de módulos instalados, arranque,
+La compilación usa Clang 23 como diagnóstico; no reproduce el toolchain
+Android original. No hay validación de módulos instalados, arranque,
 root efectivo, SELinux, suspensión, consumo o comportamiento de SUSFS.
 
 El commit exacto de la imagen de agosto continúa sin recuperarse. No se
-certifica ausencia de malware ni compatibilidad del daily driver. Para avanzar
-en la verificación de compilación está preparado el
-[plan aislado de Kbuild](BUILD_CHECK_PLAN.md), sin instalar dependencias,
-sin red durante la ejecución y sin acceso al teléfono.
+certifica ausencia de malware ni compatibilidad del daily driver. La ejecución
+del [plan aislado de Kbuild](BUILD_CHECK_PLAN.md) fue autorizada específicamente
+por el usuario, sin instalar dependencias, sin red y sin acceso al teléfono.
