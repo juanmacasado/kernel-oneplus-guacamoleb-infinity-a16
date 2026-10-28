@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Offline kernel-only repack of a pinned Android boot v2, unsigned AVB template.
+"""Offline kernel/DTB repack of a pinned Android boot v2, unsigned AVB template.
 
 Uses only Python's standard library. Never runs external tools or opens devices.
 Formats: AOSP bootimg.h, mkbootimg.py and libavb/avbtool.py.
@@ -104,14 +104,81 @@ def parse(data):
             'vbmeta': vbmeta, 'hash': hashes[0], 'original_size': original_size}
 
 
-def repack(template, kernel, partition_size):
+def split_dtbs(blob):
+    """Validate the FDT structure and preserve root IDs and A16 vendor fstab."""
+    items, pos = [], 0
+    while pos < len(blob):
+        require(pos + 40 <= len(blob), 'truncated FDT header')
+        h = struct.unpack_from('>10I', blob, pos)
+        magic, size, off, strings, reserve, version, last, cpu, nstrings, nstruct = h
+        require(magic == 0xd00dfeed and version == 17 and last <= 17,
+                'unsupported FDT header')
+        require(40 <= size <= len(blob) - pos, 'invalid FDT size')
+        require(40 <= off <= off + nstruct <= size and
+                40 <= strings <= strings + nstrings <= size and 40 <= reserve < size,
+                'invalid FDT sections')
+        data = blob[pos:pos + size]
+        cursor, end, stack, props, finished = off, off + nstruct, [], {}, False
+        while cursor + 4 <= end:
+            token = struct.unpack_from('>I', data, cursor)[0]; cursor += 4
+            if token == 1:
+                z = data.find(b'\0', cursor, end)
+                require(z >= cursor, 'unterminated FDT node')
+                stack.append(data[cursor:z].decode('ascii'))
+                cursor = align(z + 1, 4)
+            elif token == 2:
+                require(bool(stack), 'unbalanced FDT end-node')
+                stack.pop()
+            elif token == 3:
+                require(bool(stack) and cursor + 8 <= end, 'invalid FDT property')
+                length, nameoff = struct.unpack_from('>II', data, cursor); cursor += 8
+                require(nameoff < nstrings and cursor + length <= end, 'FDT property out of range')
+                z = data.find(b'\0', strings + nameoff, strings + nstrings)
+                require(z >= strings + nameoff, 'unterminated FDT property name')
+                name = data[strings + nameoff:z].decode('ascii')
+                key = '/'.join(stack) + '/' + name
+                require(key not in props, 'duplicate FDT property')
+                props[key] = data[cursor:cursor + length]
+                cursor = align(cursor + length, 4)
+            elif token == 4:
+                continue
+            elif token == 9:
+                require(not stack, 'unfinished FDT node')
+                finished = True
+                break
+            else:
+                raise ValueError('invalid FDT token')
+        require(finished, 'missing FDT end token')
+        items.append((data, props)); pos += size
+    require(0 < len(items) <= 64, 'invalid FDT count')
+    return items
+
+
+def validate_dtb_replacement(old, new):
+    original, replacement = split_dtbs(old), split_dtbs(new)
+    require(len(original) == len(replacement), 'FDT count changed')
+    for (_, before), (_, after) in zip(original, replacement):
+        ids = ['/model', '/compatible', '/qcom,msm-id', '/qcom,board-id',
+               '/oplus,dtsi_no', '/oplus,pcb_range', '/qcom,pmic-name']
+        require(all(k in before and before[k] == after.get(k) for k in ids),
+                'FDT identity/order changed')
+        fstab = {k: v for k, v in before.items() if '/android/fstab/' in k}
+        require(bool(fstab) and all(after.get(k) == v for k, v in fstab.items()),
+                'Android 16 vendor fstab changed')
+
+
+def repack(template, kernel, partition_size, dtb=None):
     require(len(template) == partition_size, 'template/partition size mismatch')
     require(8192 <= partition_size <= 128 * 1024 * 1024 and partition_size % 4096 == 0, 'unsupported partition size')
     require(64 <= len(kernel) <= 64 * 1024 * 1024 and kernel[56:60] == b'ARM\x64', 'invalid raw ARM64 Image')
     old = parse(template)
     sections = dict(old['sections'], kernel=kernel)
+    if dtb is not None:
+        validate_dtb_replacement(old['sections']['dtb'], dtb)
+        sections['dtb'] = dtb
     header = bytearray(template[:old['page']])
     struct.pack_into('<I', header, 8, len(kernel))
+    struct.pack_into('<I', header, 1648, len(sections['dtb']))
     header[576:608] = image_id(sections)
     new_dtbo_offset = old['page'] + sum(align(len(sections[n]), old['page']) for n in ['kernel', 'ramdisk', 'second'])
     struct.pack_into('<Q', header, 1636, new_dtbo_offset)
@@ -130,10 +197,11 @@ def repack(template, kernel, partition_size):
     output += struct.pack('>4sIIQQQ28s', b'AVBf', 1, 0, size, size, len(meta), bytes(28))
     new = parse(output)
     require(new['sections']['kernel'] == kernel, 'kernel changed while packing')
-    require(all(new['sections'][n] == b for n, b in old['sections'].items() if n != 'kernel'), 'non-kernel component changed')
-    # Only size, ID and relocation of recovery DTBO may change in the header.
+    require(all(new['sections'][n] == b for n, b in old['sections'].items() if n not in ['kernel', 'dtb']), 'ramdisk/second/recovery DTBO changed')
+    require(new['sections']['dtb'] == sections['dtb'], 'DTB changed while packing')
+    # Only kernel/DTB sizes, ID and recovery DTBO relocation may change.
     h = bytearray(output[:old['page']])
-    for a, b in [(8, 12), (576, 608), (1636, 1644)]:
+    for a, b in [(8, 12), (576, 608), (1636, 1644), (1648, 1652)]:
         h[a:b] = template[a:b]
     require(h == template[:old['page']], 'unexpected header change')
     return bytes(output)
@@ -158,7 +226,26 @@ def self_test(template):
     b = bytearray(template); meta_offset = old['original_size']
     struct.pack_into('>I', b, meta_offset + 28, 1); rejected('signed_avb', bytes(b))
     b = bytearray(template); b[meta_offset + old['hash']['digest_offset']] ^= 1; rejected('bad_avb_digest', bytes(b))
-    print(json.dumps({'byte_identical_round_trip': True, 'negative_cases': cases}, indent=2))
+    dtb = old['sections']['dtb']
+    require(repack(template, kernel, len(template), dtb) == template, 'DTB round trip differs')
+    items = split_dtbs(dtb)
+    invalid_dtbs = {
+        'truncated_fdt': dtb[:-1],
+        'missing_fdt': b''.join(data for data, _ in items[:-1]),
+        'reordered_fdt': items[1][0] + items[0][0] + b''.join(data for data, _ in items[2:]),
+        'changed_identity': dtb.replace(b'qcom,sm8150\0', b'qcom,badbad\0', 1),
+        'changed_vendor_fstab': dtb.replace(b'by-name/vendor\0', b'by-name/Vendor\0', 1),
+    }
+    for name, replacement in invalid_dtbs.items():
+        require(replacement != dtb, 'invalid negative DTB case')
+        try:
+            repack(template, kernel, len(template), replacement)
+        except (ValueError, struct.error):
+            cases[name] = True
+        else:
+            raise AssertionError(name + ' was accepted')
+    print(json.dumps({'byte_identical_round_trip': True, 'dtb_round_trip': True,
+                      'negative_cases': cases}, indent=2))
 
 
 def read_regular(path, maximum):
@@ -173,6 +260,8 @@ def main():
     p.add_argument('--template-sha256', required=True)
     p.add_argument('--kernel', type=Path)
     p.add_argument('--kernel-sha256')
+    p.add_argument('--dtb', type=Path)
+    p.add_argument('--dtb-sha256')
     p.add_argument('--partition-size', type=int)
     p.add_argument('--output', type=Path)
     p.add_argument('--self-test', action='store_true')
@@ -185,7 +274,11 @@ def main():
     require(all([args.kernel, args.kernel_sha256, args.partition_size, args.output]), 'missing packing arguments')
     kernel = read_regular(args.kernel, 64 * 1024 * 1024)
     require(sha256(kernel) == args.kernel_sha256, 'kernel SHA-256 mismatch')
-    output = repack(template, kernel, args.partition_size)
+    require(bool(args.dtb) == bool(args.dtb_sha256), 'DTB path and digest required together')
+    dtb = read_regular(args.dtb, 32 * 1024 * 1024) if args.dtb else None
+    if dtb is not None:
+        require(sha256(dtb) == args.dtb_sha256, 'DTB SHA-256 mismatch')
+    output = repack(template, kernel, args.partition_size, dtb)
     # Exclusive creation refuses to overwrite inputs, existing artifacts or devices.
     with args.output.open('xb') as f:
         f.write(output)
@@ -194,7 +287,8 @@ def main():
                       'template_sha256': sha256(template), 'kernel_sha256': sha256(kernel),
                       'avb_algorithm': 'NONE (preserved; no signature)',
                       'sections': {n: {'size': len(b), 'sha256': sha256(b)} for n, b in parsed['sections'].items()},
-                      'non_kernel_sections_preserved': True}, indent=2))
+                      'ramdisk_second_recovery_dtbo_preserved': True,
+                      'dtb_replaced': dtb is not None}, indent=2))
 
 
 if __name__ == '__main__':

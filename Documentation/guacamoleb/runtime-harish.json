@@ -1,0 +1,33 @@
+{
+  "test": "one temporary fastboot boot; no partition written",
+  "kernel": "4.14.357-perf-g2e381f23e9cd",
+  "boot_completed": true,
+  "root_uid": 0,
+  "selinux": "Enforcing",
+  "ksunext_driver": 33355,
+  "ksunext_tag": "v3.4.2-legacy-a16-susfs2.3",
+  "uapi": 5,
+  "susfs": "2.3.0",
+  "susfs_enabled_features": 10,
+  "wlan_builtin": true,
+  "wlan_carrier": 1,
+  "wlan_operstate": "up",
+  "wifi_association_completed": true,
+  "kfence_initialization_observed": true,
+  "bbg_initialization_observed": true,
+  "boot_sha256": "1a13d1e5d0699b0619fd16afe7669cdf6d051fb02bb11883ef7f14aaf4be3042",
+  "charger_warning": "Unbalanced enable for IRQ 600 in oplus_chg_set_input_current; reproduced on both new temporary kernel and prior installed 8bb17398, same charger source.",
+  "not_tested": [
+    "long-term stability",
+    "camera/audio/GPS/cellular hardware qualification",
+    "suspend endurance",
+    "baseband protection via destructive writes"
+  ],
+  "after_test": {
+    "kernel": "4.14.357-perf-g8bb17398cadd",
+    "boot_completed": true,
+    "wlan_carrier": 1,
+    "boot_a_sha256": "0af449c667ad7d09679f4c3c306785bfd47eed0cb5a9bccf174f1045811e22d7",
+    "boot_a_unchanged": true
+  }
+}

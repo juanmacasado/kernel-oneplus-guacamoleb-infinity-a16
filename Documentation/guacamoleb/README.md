@@ -3,13 +3,22 @@
 Rama de desarrollo para **OnePlus 7 (`guacamoleb`) con Infinity X 3.12 Vanilla
 Android 16**, preparada el 28 de octubre de 2026.
 
-El código integra un port de **KernelSU Next 3.4.2 legacy** y SUSFS **2.3.0**
-sobre la rama Android 16 de Harish. Compilan Image, 20 DTB y cinco módulos con
-Clang 23. **Se instaló en boot_a y completó arranque temporal y persistente**,
-con root, SELinux Enforcing y enlace WLAN. El gestor también se actualizó a
-3.4.2. Alcance y límites en [VERSION_3_4_2.md](VERSION_3_4_2.md),
-con [hashes de compilación](build-result342.json) y [lecturas runtime](runtime342.json).
-Los informes anteriores se conservan como historial.
+El código integra **KernelSU Next 3.4.2 legacy**, SUSFS **2.3.0** y las
+actualizaciones posteriores de Harish hasta `17-c` del 24 de octubre de 2026,
+adaptadas a la ROM Android 16. Se fusionó el historial completo; las excepciones
+de ABI y arranque están en [HARISH_UPDATES.md](HARISH_UPDATES.md).
+
+El candidato `2e381f23e9cd` compila Image, 20 DTB y cuatro módulos; WLAN va
+integrado. Superó un arranque **temporal**, Android completo, root, SELinux
+Enforcing, driver 33355/UAPI 5, SUSFS y asociación Wi-Fi. El teléfono volvió al
+boot anterior, cuya partición permanece intacta. No se presenta como una prueba
+de estabilidad prolongada. Un aviso de IRQ del cargador se reproduce también
+con el boot anterior. Evidencia: [compilación](build-result-harish.json) y
+[runtime sin identificadores personales](runtime-harish.json).
+
+La versión anterior `8bb17398cadd` sí se instaló de forma persistente y se
+conserva como recuperación. Su historial está en [VERSION_3_4_2.md](VERSION_3_4_2.md).
+El gestor continúa en 3.4.2.
 
 ## Base y procedencia
 

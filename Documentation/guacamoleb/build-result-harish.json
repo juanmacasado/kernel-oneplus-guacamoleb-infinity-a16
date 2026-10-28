@@ -1,0 +1,241 @@
+{
+  "stage": "full_kernel",
+  "returncode": 0,
+  "seconds": 305.7,
+  "source_commit": "2e381f23e9cd70474f3a8b0e6d106e712e125359",
+  "command": [
+    "/usr/bin/bwrap",
+    "--unshare-all",
+    "--die-with-parent",
+    "--ro-bind",
+    "/",
+    "/",
+    "--bind",
+    "/home/juanmacasado/ChatGPT/waffle/kernel-check-guacamoleb-harish-20261028",
+    "/home/juanmacasado/ChatGPT/waffle/kernel-check-guacamoleb-harish-20261028",
+    "--tmpfs",
+    "/tmp",
+    "--proc",
+    "/proc",
+    "--dev",
+    "/dev",
+    "--clearenv",
+    "--setenv",
+    "PATH",
+    "/usr/bin:/bin",
+    "--setenv",
+    "LANG",
+    "C",
+    "--setenv",
+    "KBUILD_BUILD_USER",
+    "build-user",
+    "--setenv",
+    "KBUILD_BUILD_HOST",
+    "build-host",
+    "/usr/bin/make",
+    "-C",
+    "/home/juanmacasado/ChatGPT/waffle/kernel-oneplus-guacamoleb-infinity-a16",
+    "O=/home/juanmacasado/ChatGPT/waffle/kernel-check-guacamoleb-harish-20261028/out",
+    "ARCH=arm64",
+    "CC=/usr/bin/clang",
+    "CLANG_TRIPLE=aarch64-linux-gnu-",
+    "CROSS_COMPILE=aarch64-linux-gnu-",
+    "CROSS_COMPILE_ARM32=arm-linux-gnueabi-",
+    "LD=/usr/bin/ld.lld",
+    "AR=/usr/bin/llvm-ar",
+    "NM=/usr/bin/llvm-nm",
+    "OBJCOPY=/usr/bin/llvm-objcopy",
+    "OBJDUMP=/usr/bin/llvm-objdump",
+    "HOSTCC=/usr/bin/gcc",
+    "HOSTCXX=/usr/bin/g++",
+    "HOSTCFLAGS=-O2 -std=gnu11",
+    "-j4",
+    "Image",
+    "dtbs",
+    "modules"
+  ],
+  "stop_reason": null,
+  "toolchain": "Clang/LLD 23.1.4; host GCC 16.2.1, HOSTCFLAGS=-O2 -std=gnu11",
+  "configuration_delta": {
+    "CONFIG_BBG": [
+      "missing",
+      "y"
+    ],
+    "CONFIG_BBG_BLOCK_BOOT": [
+      "missing",
+      "n"
+    ],
+    "CONFIG_BBG_BLOCK_RECOVERY": [
+      "missing",
+      "n"
+    ],
+    "CONFIG_BBG_DEBUG": [
+      "missing",
+      "n"
+    ],
+    "CONFIG_BOOTPARAM_HUNG_TASK_PANIC": [
+      "missing",
+      "n"
+    ],
+    "CONFIG_BOOTPARAM_HUNG_TASK_PANIC_VALUE": [
+      "missing",
+      "0"
+    ],
+    "CONFIG_BOOTPARAM_SOFTLOCKUP_PANIC": [
+      "missing",
+      "n"
+    ],
+    "CONFIG_BOOTPARAM_SOFTLOCKUP_PANIC_VALUE": [
+      "missing",
+      "0"
+    ],
+    "CONFIG_DEFAULT_HUNG_TASK_TIMEOUT": [
+      "missing",
+      "120"
+    ],
+    "CONFIG_DETECT_HUNG_TASK": [
+      "n",
+      "y"
+    ],
+    "CONFIG_DMABUF_SYSFS_STATS": [
+      "missing",
+      "y"
+    ],
+    "CONFIG_DPM_WATCHDOG": [
+      "missing",
+      "n"
+    ],
+    "CONFIG_HAVE_ARCH_KFENCE": [
+      "missing",
+      "y"
+    ],
+    "CONFIG_HAVE_COPY_THREAD_TLS": [
+      "missing",
+      "y"
+    ],
+    "CONFIG_INITRAMFS_IGNORE_SKIP_FLAG": [
+      "missing",
+      "n"
+    ],
+    "CONFIG_IPV6_MROUTE": [
+      "n",
+      "y"
+    ],
+    "CONFIG_IPV6_MROUTE_MULTIPLE_TABLES": [
+      "missing",
+      "n"
+    ],
+    "CONFIG_IPV6_PIMSM_V2": [
+      "missing",
+      "n"
+    ],
+    "CONFIG_KFENCE": [
+      "missing",
+      "y"
+    ],
+    "CONFIG_KFENCE_NUM_OBJECTS": [
+      "missing",
+      "63"
+    ],
+    "CONFIG_KFENCE_SAMPLE_INTERVAL": [
+      "missing",
+      "500"
+    ],
+    "CONFIG_KFENCE_STATIC_KEYS": [
+      "missing",
+      "y"
+    ],
+    "CONFIG_KFENCE_STRESS_TEST_FAULTS": [
+      "missing",
+      "0"
+    ],
+    "CONFIG_LOCKUP_DETECTOR": [
+      "missing",
+      "y"
+    ],
+    "CONFIG_LZO_COMPRESS": [
+      "missing",
+      "y"
+    ],
+    "CONFIG_LZO_DECOMPRESS": [
+      "missing",
+      "y"
+    ],
+    "CONFIG_PM_ADVANCED_DEBUG": [
+      "missing",
+      "n"
+    ],
+    "CONFIG_PM_DEBUG": [
+      "n",
+      "y"
+    ],
+    "CONFIG_PM_SLEEP_DEBUG": [
+      "missing",
+      "y"
+    ],
+    "CONFIG_PM_TEST_SUSPEND": [
+      "missing",
+      "n"
+    ],
+    "CONFIG_PROC_CMDLINE_APPEND_ANDROID_FORCE_NORMAL_BOOT": [
+      "missing",
+      "n"
+    ],
+    "CONFIG_PSTORE_COMPRESS": [
+      "missing",
+      "y"
+    ],
+    "CONFIG_PSTORE_COMPRESS_DEFAULT": [
+      "missing",
+      "\"lzo\""
+    ],
+    "CONFIG_PSTORE_LZO_COMPRESS": [
+      "n",
+      "y"
+    ],
+    "CONFIG_PSTORE_LZO_COMPRESS_DEFAULT": [
+      "missing",
+      "y"
+    ],
+    "CONFIG_QCA_CLD_WLAN": [
+      "m",
+      "y"
+    ],
+    "CONFIG_SOFTLOCKUP_DETECTOR": [
+      "n",
+      "y"
+    ]
+  },
+  "artifacts": {
+    "sha256": "1a13d1e5d0699b0619fd16afe7669cdf6d051fb02bb11883ef7f14aaf4be3042",
+    "size": 100663296,
+    "template_sha256": "0af449c667ad7d09679f4c3c306785bfd47eed0cb5a9bccf174f1045811e22d7",
+    "kernel_sha256": "5171f37fe1657a35e1adfcf408e8fce67c89b6e036154f42ae27460dad62a73f",
+    "avb_algorithm": "NONE (preserved; no signature)",
+    "sections": {
+      "kernel": {
+        "size": 50872344,
+        "sha256": "5171f37fe1657a35e1adfcf408e8fce67c89b6e036154f42ae27460dad62a73f"
+      },
+      "ramdisk": {
+        "size": 19030059,
+        "sha256": "ddab1112edaa3b54b6ef8aa6e734fceff21621b87965418562b73356b6729abe"
+      },
+      "second": {
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "recovery_dtbo": {
+        "size": 3223552,
+        "sha256": "901416892d6e1a364aa19bf96c916636ec2fa52c70a80991a381946144f7f5f8"
+      },
+      "dtb": {
+        "size": 9057628,
+        "sha256": "a3a786072903f35847275073b2ecf5ec04cc15c372c73ca9beca4ec8bb6d1b1b"
+      }
+    },
+    "ramdisk_second_recovery_dtbo_preserved": true,
+    "dtb_replaced": true
+  },
+  "warnings": "4 inherited OPlus manifest/initdata section references; same source as tested base; diagnostic build, no full hardware qualification"
+}

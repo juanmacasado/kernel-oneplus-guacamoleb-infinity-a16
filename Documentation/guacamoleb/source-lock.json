@@ -200,5 +200,14 @@
       "fixed legacy force_feature parser end-of-input overread"
     ],
     "integration_commit": "8bb17398caddb23966f215e55518174687289353"
+  },
+  "kernel_updates": {
+    "repository": "https://github.com/Codecity001/android_kernel_oneplus_sm8150",
+    "branch_observed": "17-c",
+    "commit": "b1d34c4a99eaed5531333781ec8f389c53b9bad9",
+    "merge_commit": "2e381f23e9cd70474f3a8b0e6d106e712e125359",
+    "merge_base": "6ecfabed032b68a8f0a0fd003cf5fbfb6d672acb",
+    "committer_date": "2026-10-24T18:59:21Z",
+    "exceptions_document": "HARISH_UPDATES.md"
   }
 }
